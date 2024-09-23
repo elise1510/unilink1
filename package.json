@@ -2,7 +2,7 @@
   "name": "unilink1",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/main.ts",
   "dependencies": {
     "acorn": "^8.12.1",
     "acorn-import-attributes": "^1.9.5",
@@ -199,6 +199,8 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
+     "start": "tsc && electron ./dist/main.js",
+  "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
