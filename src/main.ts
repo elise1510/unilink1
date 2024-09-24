@@ -2,7 +2,7 @@
 
 import { app, BrowserWindow,ipcMain, Menu } from 'electron';
 import { initializeApp } from 'firebase/app';
-const path = require('path');
+import path from 'path';
 //Global Variables
 let mainWindow;
 let menu;
@@ -18,7 +18,7 @@ function createWindow() {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
-        preload: path.join(__dirname, 'preload.ts'),
+       // preload: path.join('../src/preload.js'),
         spellcheck: true,
       },
     })
@@ -26,7 +26,7 @@ function createWindow() {
 
       
     mainWindow.setMinimumSize(300, 300);
-    mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+    mainWindow.loadFile(path.join('../src/registration.html'));
   }
   app.whenReady().then(() => {
     createWindow();

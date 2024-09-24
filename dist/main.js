@@ -1,13 +1,11 @@
-"use strict";
 //Import Blocks
-Object.defineProperty(exports, "__esModule", { value: true });
-const electron_1 = require("electron");
-const path = require('path');
+import { app, BrowserWindow } from 'electron';
+import path from 'path';
 //Global Variables
 let mainWindow;
 let menu;
 function createWindow() {
-    mainWindow = new electron_1.BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         //frame: process.platform === 'darwin' ? false : true,
@@ -17,14 +15,14 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            preload: path.join(__dirname, 'preload.ts'),
+            // preload: path.join('../src/preload.js'),
             spellcheck: true,
         },
     });
     mainWindow.setMinimumSize(300, 300);
-    mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+    mainWindow.loadFile(path.join('../src/registration.html'));
 }
-electron_1.app.whenReady().then(() => {
+app.whenReady().then(() => {
     createWindow();
 });
 //# sourceMappingURL=main.js.map
