@@ -2,6 +2,8 @@
 import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+// @ts-ignore
+import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -14,9 +16,10 @@ const firebaseConfig = {
     measurementId: "G-NGJJN6W8ZC"
 };
 
-// Initialize Firebase
+//  Firebase Import Blockk
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const database = getDatabase(app);
 
 class UserRegistration {
     private username: string;
@@ -29,10 +32,9 @@ class UserRegistration {
         this.password = password;
     }
 
-
     private getUserRole(): string | null {
-        const studentPattern = /^[a-z]{3}\d{4}@mavs\.uta\.edu$/i;
-        const staffPattern = /^[a-z]+\.[a-z]+@uta\.edu$/i;
+        const studentPattern = /^[a-z]{3}\d{4}@mavs\.uta\.edu$/i; // xxx####@mavs.uta.edu
+        const staffPattern = /^[a-z]+\.[a-z]+@uta\.edu$/i; // name.name@uta.edu
 
         if (studentPattern.test(this.email)) {
             return 'student';
@@ -48,11 +50,28 @@ class UserRegistration {
         messageDiv.innerText = message;
     }
 
+
+    private async saveUserRole(uid: string, role: string) {
+        try {
+            await set(ref(database, 'users/' + uid), {
+                uid: uid,
+                username: this.username,
+                email: this.email,
+                role: role
+            });
+            console.log('User role saved to Realtime Database successfully.');
+        } catch (error) {
+            console.error('Error saving user role:', error);
+            this.updateMessage('Error saving user data. Please try again.', 'red');
+        }
+    }
+
     async register(): Promise<void> {
         try {
-   
-            if (!this.email.endsWith('.uta.edu')) {
-                this.updateMessage('Email must end with .uta.edu', 'red');
+            const role = this.getUserRole();
+
+            if (!role) {
+                this.updateMessage('Invalid email pattern. Must be xxx####@mavs.uta.edu or name.name@uta.edu.', 'red');
                 return;
             }
 
@@ -60,14 +79,9 @@ class UserRegistration {
             const user = userCredential.user;
 
             await updateProfile(user, { displayName: this.username });
+            await this.saveUserRole(user.uid, role); 
 
-            const role = this.getUserRole();
-            if (role) {
-                this.updateMessage(`User registered successfully as a ${role}.`, 'green');
-            } else {
-                this.updateMessage('User registered successfully.', 'green');
-            }
-
+            this.updateMessage(`User registered successfully as a ${role}.`, 'green');
         } catch (error: any) {
             if (error.code === 'auth/email-already-in-use') {
                 this.updateMessage('Email is already taken.', 'red');

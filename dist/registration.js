@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+// @ts-ignore
+import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA3Eau1V4XxcHMrV02FxIuXprFpb2NR510",
@@ -24,6 +26,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const database = getDatabase(app); // Realtime Database initialization
 class UserRegistration {
     constructor(username, email, password) {
         this.username = username;
@@ -31,8 +34,8 @@ class UserRegistration {
         this.password = password;
     }
     getUserRole() {
-        const studentPattern = /^[a-z]{3}\d{4}@mavs\.uta\.edu$/i;
-        const staffPattern = /^[a-z]+\.[a-z]+@uta\.edu$/i;
+        const studentPattern = /^[a-z]{3}\d{4}@mavs\.uta\.edu$/i; // xxx####@mavs.uta.edu
+        const staffPattern = /^[a-z]+\.[a-z]+@uta\.edu$/i; // name.name@uta.edu
         if (studentPattern.test(this.email)) {
             return 'student';
         }
@@ -46,23 +49,36 @@ class UserRegistration {
         messageDiv.style.color = color;
         messageDiv.innerText = message;
     }
+    // Save user role in Realtime Database
+    saveUserRole(uid, role) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield set(ref(database, 'users/' + uid), {
+                    username: this.username,
+                    email: this.email,
+                    role: role
+                });
+                console.log('User role saved to Realtime Database successfully.');
+            }
+            catch (error) {
+                console.error('Error saving user role:', error);
+                this.updateMessage('Error saving user data. Please try again.', 'red');
+            }
+        });
+    }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (!this.email.endsWith('.uta.edu')) {
-                    this.updateMessage('Email must end with .uta.edu', 'red');
+                const role = this.getUserRole();
+                if (!role) {
+                    this.updateMessage('Invalid email pattern. Must be xxx####@mavs.uta.edu or name.name@uta.edu.', 'red');
                     return;
                 }
                 const userCredential = yield createUserWithEmailAndPassword(auth, this.email, this.password);
                 const user = userCredential.user;
                 yield updateProfile(user, { displayName: this.username });
-                const role = this.getUserRole();
-                if (role) {
-                    this.updateMessage(`User registered successfully as a ${role}.`, 'green');
-                }
-                else {
-                    this.updateMessage('User registered successfully.', 'green');
-                }
+                yield this.saveUserRole(user.uid, role); // Save user role in Realtime Database
+                this.updateMessage(`User registered successfully as a ${role}.`, 'green');
             }
             catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
@@ -96,6 +112,7 @@ class UserRegistration {
         return true;
     }
 }
+// Handling form submission
 const form = document.getElementById('registrationForm');
 form.addEventListener('submit', (event) => __awaiter(void 0, void 0, void 0, function* () {
     event.preventDefault();

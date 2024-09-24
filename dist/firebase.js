@@ -1,6 +1,6 @@
-import { getAuth } from "firebase/auth";
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore/lite';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js'
 //Constants
 const firebaseConfig = {
     apiKey: "AIzaSyA3Eau1V4XxcHMrV02FxIuXprFpb2NR510",
