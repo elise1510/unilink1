@@ -1,7 +1,7 @@
-#Html
+# Html
 - Ids = kebab
 - Option Value = Kebab 
-#TS
+# TS
 - Classes = Pascal
 - Variable = Camel
 - Function = Camel
