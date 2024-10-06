@@ -21,6 +21,90 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
+//majors
+const majorsByCollege = {
+    CAPPA: [
+        { value: 'arch', text: 'Architecture' },
+        { value: 'intDes', text: 'Interior Design' },
+        { value: 'sustUD', text: 'Sustainable Urban Design' }
+    ],
+    CB: [
+        { value: 'acct', text: 'Accounting' },
+        { value: 'busAna', text: 'Business Analytics' },
+        { value: 'econ', text: 'Economics' },
+        { value: 'fin', text: 'Finance' },
+        { value: 'infoSys', text: 'Information Systems' },
+        { value: 'intBus', text: 'International Business-Foreign Language' },
+        { value: 'mgt', text: 'Management' },
+        { value: 'mkt', text: 'Marketing' },
+        { value: 'osc', text: 'Operations and Supply Chain Management' },
+        { value: 'realEst', text: 'Real Estate' }
+    ],
+    CE: [
+        { value: 'edu', text: 'Education' }
+    ],
+    CEng: [
+        { value: 'aeroEng', text: 'Aerospace Engineering' },
+        { value: 'archEng', text: 'Architectural Engineering' },
+        { value: 'bioEng', text: 'Biomedical Engineering' },
+        { value: 'civilEng', text: 'Civil Engineering' },
+        { value: 'compEng', text: 'Computer Engineering' },
+        { value: 'cs', text: 'Computer Science' },
+        { value: 'constMgt', text: 'Construction Management' },
+        { value: 'elecEng', text: 'Electrical Engineering' },
+        { value: 'indEng', text: 'Industrial Engineering' },
+        { value: 'mechEng', text: 'Mechanical Engineering' },
+        { value: 'resEng', text: 'Resource and Energy Engineering' },
+        { value: 'softEng', text: 'Software Engineering' }
+    ],
+    CLA: [
+        { value: 'anthro', text: 'Anthropology' },
+        { value: 'apSoc', text: 'Applied Sociology' },
+        { value: 'art', text: 'Art' },
+        { value: 'artHist', text: 'Art History' },
+        { value: 'comm', text: 'Communication' },
+        { value: 'ccj', text: 'Criminology and Criminal Justice' },
+        { value: 'clis', text: 'Critical Languages and International Studies' },
+        { value: 'eng', text: 'English' },
+        { value: 'french', text: 'French' },
+        { value: 'hist', text: 'History' },
+        { value: 'ling', text: 'Linguistics' },
+        { value: 'music', text: 'Music' },
+        { value: 'musicInd', text: 'Music Industry Studies' },
+        { value: 'musicPerf', text: 'Music Performance' },
+        { value: 'philant', text: 'Philanthropy' },
+        { value: 'phil', text: 'Philosophy' },
+        { value: 'polSci', text: 'Political Science' },
+        { value: 'soc', text: 'Sociology' },
+        { value: 'spanGC', text: 'Spanish for Global Competence' },
+        { value: 'spanTI', text: 'Spanish Translation and Interpreting' },
+        { value: 'theaArts', text: 'Theatre Arts' }
+    ],
+    CNHI: [
+        { value: 'exSci', text: 'Exercise Science' },
+        { value: 'kin', text: 'Kinesiology' },
+        { value: 'nurs', text: 'Nursing' },
+        { value: 'pubHealth', text: 'Public Health' }
+    ],
+    CS: [
+        { value: 'biochem', text: 'Biochemistry' },
+        { value: 'bioChem', text: 'Biological Chemistry' },
+        { value: 'bio', text: 'Biology' },
+        { value: 'chem', text: 'Chemistry' },
+        { value: 'dataSci', text: 'Data Science' },
+        { value: 'ees', text: 'Environmental and Earth Sciences' },
+        { value: 'geol', text: 'Geology' },
+        { value: 'math', text: 'Mathematics' },
+        { value: 'medTech', text: 'Medication Technology' },
+        { value: 'microbio', text: 'Microbiology' },
+        { value: 'phys', text: 'Physics' },
+        { value: 'psych', text: 'Psychology' }
+    ],
+    SSW: [
+        { value: 'sw', text: 'Social Work' },
+        { value: 'subUse', text: 'Substance Use and Treatment' }
+    ]
+};
 
 
 
@@ -28,7 +112,7 @@ class CreateJob {
     about: string;
     title: string;
     repons: string;
-    gradeLevel: string;
+    gradeLevels: string [];
     expirence: string;
     time: string;
     workload: string;
@@ -45,7 +129,7 @@ class CreateJob {
         this.about = (document.getElementById('about') as HTMLInputElement).value;
         this.title = (document.getElementById('title') as HTMLInputElement).value;
         this.repons = (document.getElementById('respons') as HTMLInputElement).value;
-        this.gradeLevel = (document.getElementById('grade-level') as HTMLInputElement).value;
+        this.gradeLevels = Array.from((document.getElementById('grade-level') as HTMLSelectElement).selectedOptions).map(opt => opt.value);
         this.expirence = (document.getElementById('expirence') as HTMLInputElement).value;
         this.time = (document.getElementById('time') as HTMLInputElement).value;
         this.type = (document.getElementById('type') as HTMLInputElement).value;
@@ -64,7 +148,7 @@ class CreateJob {
                 about: this.about,
                 title: this.title,
                 repons: this.repons,
-                gradeLevel: this.gradeLevel,
+                gradeLevels: this.gradeLevels,
                 expirence: this.expirence,
                 time: this.time,
                 workload: this.workload,
@@ -93,6 +177,28 @@ form.addEventListener('submit', async (event) => {
     }
 });
 
+function updateMajors() {
+    const collegeSelect = document.getElementById('college') as HTMLSelectElement;
+    const majorsSelect = document.getElementById('majors') as HTMLSelectElement;
+
+    majorsSelect.innerHTML = '';
+
+    const selectedColleges = Array.from(collegeSelect.selectedOptions).map(opt => opt.value) as Array<keyof typeof majorsByCollege>;
+
+    let majorsToShow: { value: string, text: string }[] = [];
+    selectedColleges.forEach(college => {
+        majorsToShow = majorsToShow.concat(majorsByCollege[college] || []);
+    });
+    majorsToShow.forEach(major => {
+        const option = document.createElement('option');
+        option.value = major.value;
+        option.textContent = major.text;
+        majorsSelect.appendChild(option);
+    });
+}
+
+const collegeSelect = document.getElementById('college') as HTMLSelectElement;
+collegeSelect.addEventListener('change', updateMajors);
 
 
 

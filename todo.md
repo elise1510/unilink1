@@ -3,7 +3,7 @@
 - [X] Push job to firebase -> IMP
     - [X] collect attributes
 - [ ] Verify input -> collect attributes
-- [ ] College/ Major select filtering
+- [x] College/ Major select filtering
     - [ ] college/major multiselect fix
 - [ ] Grade Level Multiselect
 - [ ] Return to hompage -> dependency Homepage
