@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <title>title</title>
-    <form>
+   
+</head>
+<body>
+     <form id = "create-job">
         <label for="about">About this job:</label>
         <input type="text" id="about" name="about" required> 
         <br>
         <label for="title">Job Title:</label>
-        <input type="text" id="Title" name="Title" required> 
+        <input type="text" id="title" name="Title" required> 
         <br>
         <label for="college">Desired College:</label>
-        <select id="collegs" name="college" multiple> 
+        <select id="college" name="college" multiple> 
             <option> test</option>
             <option> test</option>
             <option> test</option>
@@ -55,7 +58,7 @@
         </select>
         <br>
         <label for="gradelevel">grade level:</label>
-        <select id="gradelevel" name="gradelevel"> 
+        <select id="grade-level" name="gradelevel"> 
             <option value = "fresh">Freshmen</option>
             <option value = "soph">Sophomore</option>
             <option value = "jun">Junior</option>
@@ -65,13 +68,13 @@
         <label for="logo">Upload Company Logo:</label>
         <input type="file" id="logo" name="logo" accept="image/*">
         <br>
-        <label for="hourlyRate">Hourly Rate (in $):</label>
-        <input type="number" id="hourlyRateMin" name="hourlyRateMin" placeholder="Min" min="0" step="0.01">
-        <input type="number" id="hourlyRateMax" name="hourlyRateMax" placeholder="Max" min="0" step="0.01">
+        <label for="hourly-rate">Hourly Rate (in $):</label>
+        <input type="number" id="hourly-rate-min" name="hourlyRateMin" placeholder="Min" min="0" step="0.01">
+        <input type="number" id="hourly-rate-max" name="hourlyRateMax" placeholder="Max" min="0" step="0.01">
         <br>
         
         <label for="maxApplications">Maximum Number of Applications:</label>
-        <input type="number" id="maxApplications" name="maxApplications" min="1">
+        <input type="number" id="max-applications" name="maxApplications" min="1">
         <br>
         
         <label for="expirationDate">Listing Expiration Date:</label>
@@ -84,10 +87,8 @@
         
 
         
-    
+        <button type="submit">Register</button>
     </form>
-</head>
-<body>
-    
+    <script type="module" src="../dist/createJob.js"></script>
 </body>
 </html>

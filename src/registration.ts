@@ -128,3 +128,5 @@ form.addEventListener('submit', async (event) => {
         await userRegistration.register();
     }
 });
+
+//export {firebaseConfig};
