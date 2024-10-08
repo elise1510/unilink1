@@ -16,7 +16,7 @@ const firebaseConfig = {
     measurementId: "G-NGJJN6W8ZC"
 };
 
-//  Firebase Import Blockk
+//  Firebase Import Block
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
@@ -79,7 +79,7 @@ class UserRegistration {
             const user = userCredential.user;
 
             await updateProfile(user, { displayName: this.username });
-            await this.saveUserRole(user.uid, role); 
+            await this.saveUserRole(user.uid, role);
 
             this.updateMessage(`User registered successfully as a ${role}.`, 'green');
         } catch (error: any) {
@@ -128,5 +128,7 @@ form.addEventListener('submit', async (event) => {
         await userRegistration.register();
     }
 });
+
+document.getElementById('login')?.addEventListener('click', () => {window.location.href = 'login.html';});
 
 //export {firebaseConfig};

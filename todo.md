@@ -15,5 +15,8 @@
 - [ ] all CSS - low priority
 # Reg - Elise 
 - [ ] go to hompage -> dependency Homepage
+- [ ] Remove Username
+- [ ] Send Email Verification
+- [ ] OPT - Remove Password (just email link)
 # Login - Elise
-- [ ] all
+- [ ] go to hompage -> dependency Homepage
