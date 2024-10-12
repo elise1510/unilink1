@@ -20,3 +20,6 @@
 - [ ] OPT - Remove Password (just email link)
 # Login - Elise
 - [ ] go to hompage -> dependency Homepage
+# UserProfile - Zobia 
+- [ ] UseProfile Creation
+- [ ] Add User Info
