@@ -116,7 +116,7 @@ form.addEventListener('submit', async (event) => {
     }
 });
 
-// Load the current user's profile when the page loads
+// Load current user's profile when the page loads
 window.onload = async () => {
     const user = auth.currentUser;
     if (user) {
