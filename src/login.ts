@@ -35,9 +35,18 @@ class UserLogin {
             const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password);
             const user = userCredential.user;
 
-
+            console.log(user)
             this.updateMessage(`Login successful. Welcome, ${user.email}!`, 'green');
             console.log('Login successful:', user);
+            localStorage.setItem('userinfo', JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                credentials: userCredential,
+                user: userCredential.user
+            }));
+    
+            
+           window.location.href = 'profile.html';
 
         } catch (error: any) {
             if (error.code === 'auth/user-not-found') {
@@ -83,6 +92,8 @@ form.addEventListener('submit', async (event) => {
     if (UserLogin.validateForm(email, password)) {
         const userLogin = new UserLogin(email, password);
         await userLogin.login();
+        
+       
     }
 });
 

@@ -126,6 +126,7 @@ form.addEventListener('submit', async (event) => {
     if (UserRegistration.validateForm(username, email, password)) {
         const userRegistration = new UserRegistration(username, email, password);
         await userRegistration.register();
+        window.location.href = 'profile.html';
     }
 });
 

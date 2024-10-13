@@ -1,0 +1,80 @@
+ - COLLEGE OF ARCHITECTURE, PLANNING AND PUBLIC AFFAIRS
+  - Architecture
+  - Interior Design
+  - Sustainable Urban Design 
+ - COLLEGE OF BUSINESS
+   - Accounting
+   - Business Analytics
+   - Economics
+   - Finance
+   - Information Systems
+   - International Business-Foreign Language
+   - Management
+   - Marketing
+   - Operations and Supply Chain Management
+   - Real Estate
+ - COLLEGE OF EDUCATION
+  - Education
+ - COLLEGE OF ENGINEERING
+   - Aerospace Engineering
+   - Architectural Engineering
+   - Biomedical Engineering
+   - Civil Engineering
+   - Computer Engineering
+   - Computer Science
+   - Construction Management
+   - Electrical Engineering
+   - Industrial Engineering
+   - Mechanical Engineering
+   - Resource and Energy Engineering
+   - Software Engineering
+ - COLLEGE OF LIBERAL ARTS 
+  - Anthropology
+  - Applied Sociology
+  - Art
+  - Art History
+  - Communication
+  - Criminology and Criminal Justice
+  - Critical Languages and International Studies
+  - English
+  - French
+  - History
+  - Linguistics
+  - Music
+  - Music Industry Studies
+  - Music Performance
+  - Philanthropy
+  - Philosophy
+  - Political Science
+  - Sociology
+  - Spanish for Global Competence
+  - Spanish Translation and Interpreting
+  - Theatre Arts
+ - COLLEGE OF NURSING AND HEALTH INNOVATION
+    - Exercise Science
+    - Kinesiology
+    - Nursing
+    - Public Health
+ - COLLEGE OF SCIENCE
+    - Biochemistry
+    - Biological Chemistry
+    - Biology
+    - Chemistry
+    - Data Science
+    - Environmental and Earth Sciences
+    - Geology
+    - Mathematics
+    - Medication Technology
+    - Microbiology
+    - Physics
+    - Psychology
+ - SCHOOL OF SOCIAL WORK
+    - Social Work
+    - Substance Use and Treatment
+
+
+
+
+
+
+
