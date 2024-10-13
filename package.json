@@ -167,7 +167,6 @@
     "terser": "^5.33.0",
     "terser-webpack-plugin": "^5.3.10",
     "to-regex-range": "^5.0.1",
-    "ts-node": "^10.9.2",
     "tslib": "^2.7.0",
     "type-fest": "^0.13.1",
     "undici": "^6.19.7",
@@ -195,9 +194,10 @@
   "devDependencies": {
     "@types/node": "^22.6.1",
     "electron": "^32.1.2",
-    "firebase": "^10.13.2",
+    "firebase": "^10.14.1",
     "ts-loader": "^9.5.1",
-    "typescript": "^5.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   },

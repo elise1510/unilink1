@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var _a;
 // @ts-ignore
 import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 // @ts-ignore
@@ -23,7 +24,7 @@ const firebaseConfig = {
     appId: "1:273956700882:web:c14a46a0074d9c8fed230b",
     measurementId: "G-NGJJN6W8ZC"
 };
-//  Firebase Import Blockk
+//  Firebase Import Block
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
@@ -121,6 +122,9 @@ form.addEventListener('submit', (event) => __awaiter(void 0, void 0, void 0, fun
     if (UserRegistration.validateForm(username, email, password)) {
         const userRegistration = new UserRegistration(username, email, password);
         yield userRegistration.register();
+        window.location.href = 'profile.html';
     }
 }));
+(_a = document.getElementById('login')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => { window.location.href = 'login.html'; });
+//export {firebaseConfig};
 //# sourceMappingURL=registration.js.map
