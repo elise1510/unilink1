@@ -1,5 +1,4 @@
 # Create Jobs - Elise
-## CreateJobs.ts
 - [X] Push job to firebase -> IMP
     - [X] collect attributes
 - [ ] Verify input -> collect attributes
@@ -10,6 +9,7 @@
 - [x] Grade Level Multiselect
 - [ ] Return to hompage -> dependency Homepage
 - [ ] Link from Homepage -> dependency Homepage
+# Create Events - Ankita
 # General - Any
 - [ ] homepage HTML - high priority
 - [ ] all CSS - low priority
@@ -20,6 +20,22 @@
 - [ ] OPT - Remove Password (just email link)
 # Login - Elise
 - [ ] go to hompage -> dependency Homepage
-# UserProfile - Zobia 
-- [ ] UseProfile Creation
-- [ ] Add User Info
+- [ ] Autologin
+- [ ] encryption
+# UserProfile - Zobia + Elise
+- [x] UseProfile Creation
+- [X] Add User Info
+- [ ] Change Graduation Year from text to select
+- [ ] Logo
+- [ ] Link to homepage -> homepage
+- [ ] Link from homepage -> homepage
+# Homepage - Elise
+# Search and Filter - Zobia
+# Students submit to jobs, rsvp to events - Z + E
+# Jobs sort applicants - Z + E
+# Optional
+- Messaging: Me
+- Alumni/ approval system: Any
+   
+
+
