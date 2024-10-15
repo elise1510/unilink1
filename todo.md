@@ -29,6 +29,7 @@
 - [ ] Logo
 - [ ] Link to homepage -> homepage
 - [ ] Link from homepage -> homepage
+- [ ] if staff, no major, important
 # Homepage - Elise
 # Search and Filter - Zobia
 # Students submit to jobs, rsvp to events - Z + E
