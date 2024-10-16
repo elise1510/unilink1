@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, set, DataSnapshot, onValue, get, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 import { doc } from 'firebase/firestore/lite';
 
 // Firebase configuration
@@ -142,8 +142,35 @@ class CreateJob {
         this.maxApplicants = parseInt((document.getElementById('max-applications') as HTMLInputElement).value);
     }
      async saveJob(uid: string) {
+        let now: Date =  new Date();
+        const userRef = ref(database, 'users/' + uid);
+        const snapshot: DataSnapshot = await get(userRef);
+        let poster =  "Name Not Set";
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            poster = userData?.name;
+        }
+        if(poster === undefined)
+        {
+            poster =  "Name Not Set";
+        }
+        let uniqueKey = uid + this.title;
+        let i = 0;
+        let check= await checkForMatch(uniqueKey);
+        let change = false;
+        console.log("check:",check);
+        while(check === false){
+            i++;
+            console.log("match outside of loop");
+            check = await checkForMatch(uniqueKey+i);
+            change = true;
+        }
+        if(check === true && change === true){
+            uniqueKey = uniqueKey + i;
+        }
+
         try {
-            await set(ref(database, 'jobs/' + uid), {
+            await set(ref(database, 'jobs/' + uniqueKey), {
                 uid: uid,
                 about: this.about,
                 title: this.title,
@@ -158,7 +185,9 @@ class CreateJob {
                 expirationDate: this.expirationDate,
                 college: this.college,
                 majors: this.majors,
-                maxApplicants: this.maxApplicants
+                maxApplicants: this.maxApplicants,
+                DatePosted: now,
+                postedBy: poster
             });
             console.log('User role saved to Realtime Database successfully.');
         } catch (error) {
@@ -204,4 +233,18 @@ collegeSelect.addEventListener('change', updateMajors);
 
 
 
+async function checkForMatch(uniqueKey: string): Promise<boolean> {
+    const jobRef = ref(database, 'jobs');
+    const snapshot = await get(jobRef);
 
+    let match = true;
+
+    snapshot.forEach((levelSnapshot: DataSnapshot) => {
+        const compKey = levelSnapshot.key;
+        if (compKey === uniqueKey) {
+            match = false;
+        }
+    });
+
+    return match;
+}
