@@ -104,150 +104,158 @@ const majorsByCollege = {
         { value: 'subUse', text: 'Substance Use and Treatment' }
     ]
 };
-const pepDisp = document.querySelector('.pep-disp') as HTMLElement | null;
-const eveDisp = document.querySelector('.eve-disp') as HTMLElement | null;
-const posDisp = document.querySelector('.pos-disp') as HTMLElement | null;
+class Homepage {
+    private pepDisp: HTMLElement | null;
+    private eveDisp: HTMLElement | null;
+    private posDisp: HTMLElement | null;
+    private pepLabel: HTMLElement | null;
+    private eveLabel: HTMLElement | null;
+    private posLabel: HTMLElement | null;
 
+    constructor() {
+        this.pepDisp = document.querySelector('.pep-disp');
+        this.eveDisp = document.querySelector('.eve-disp');
+        this.posDisp = document.querySelector('.pos-disp');
+        this.pepLabel = document.getElementById('pep-label');
+        this.eveLabel = document.getElementById('eve-label');
+        this.posLabel = document.getElementById('pos-label');
+        this.initTabListeners();
+        this.initLabelListeners();
+    }
 
-document.querySelectorAll('input[name="tab"]').forEach((radio) => {
-    const inputRadio = radio as HTMLInputElement;
+    initTabListeners() {
+        document.querySelectorAll('input[name="tab"]').forEach((radio) => {
+            const inputRadio = radio as HTMLInputElement;
 
-    inputRadio.addEventListener('change', () => {
-        if (inputRadio.value === 'pep' && pepDisp && eveDisp && posDisp) {
-            pepDisp.classList.add('active');
-            pepDisp.style.display = 'block';
+            inputRadio.addEventListener('change', () => {
+                if (inputRadio.value === 'pep' && this.pepDisp && this.eveDisp && this.posDisp) {
+                    this.pepDisp.classList.add('active');
+                    this.pepDisp.style.display = 'block';
+                    this.eveDisp.classList.remove('active');
+                    this.eveDisp.style.display = 'none';
+                    this.posDisp.classList.remove('active');
+                    this.posDisp.style.display = 'none';
+                    this.displayUsersData();
+                } else if (inputRadio.value === 'eve' && this.pepDisp && this.eveDisp && this.posDisp) {
+                    this.pepDisp.classList.remove('active');
+                    this.pepDisp.style.display = 'none';
+                    this.eveDisp.classList.add('active');
+                    this.eveDisp.style.display = 'block';
+                    this.posDisp.classList.remove('active');
+                    this.posDisp.style.display = 'none';
+                } else if (inputRadio.value === 'pos' && this.pepDisp && this.eveDisp && this.posDisp) {
+                    this.pepDisp.classList.remove('active');
+                    this.pepDisp.style.display = 'none';
+                    this.eveDisp.classList.remove('active');
+                    this.eveDisp.style.display = 'none';
+                    this.posDisp.classList.add('active');
+                    this.posDisp.style.display = 'block';
+                    this.displayJobsData();
+                }
+            });
+        });
+    }
 
-            eveDisp.classList.remove('active');
-            eveDisp.style.display = 'none';
-
-            posDisp.classList.remove('active');
-            posDisp.style.display = 'none';
-            displayUsersData();
-
-        } else if (inputRadio.value === 'eve' && pepDisp && eveDisp && posDisp) {
-            pepDisp.classList.remove('active');
-            pepDisp.style.display = 'none';
-
-            eveDisp.classList.add('active');
-            eveDisp.style.display = 'block';
-
-            posDisp.classList.remove('active');
-            posDisp.style.display = 'none';
-
-        } else if (inputRadio.value === 'pos' && pepDisp && eveDisp && posDisp) {
-            pepDisp.classList.remove('active');
-            pepDisp.style.display = 'none';
-
-            eveDisp.classList.remove('active');
-            eveDisp.style.display = 'none';
-
-            posDisp.classList.add('active');
-            posDisp.style.display = 'block';
-            displayJobsData();
+    initLabelListeners() {
+        if (this.pepLabel && this.posLabel && this.eveLabel) {
+            this.pepLabel.addEventListener('click', () => {
+                this.pepLabel!.classList.add('active');
+                this.eveLabel!.classList.remove('active');
+                this.posLabel!.classList.remove('active');
+            });
+            this.eveLabel.addEventListener('click', () => {
+                this.pepLabel!.classList.remove('active');
+                this.eveLabel!.classList.add('active');
+                this.posLabel!.classList.remove('active');
+            });
+            this.posLabel.addEventListener('click', () => {
+                this.pepLabel!.classList.remove('active');
+                this.eveLabel!.classList.remove('active');
+                this.posLabel!.classList.add('active');
+            });
         }
-    });
-});
+    }
 
-const pepLabel = document.getElementById('pep-label');
-const eveLabel = document.getElementById('eve-label');
-const posLabel = document.getElementById('pos-label');
-if (pepLabel && posLabel && eveLabel) {
-    pepLabel.addEventListener('click', () => {
-        pepLabel.classList.add('active');
-        eveLabel.classList.remove('active');
-        posLabel.classList.remove('active');
-    });
-    eveLabel.addEventListener('click', () => {
-        pepLabel.classList.remove('active');
-        eveLabel.classList.add('active');
-        posLabel.classList.remove('active');
-    });
-    posLabel.addEventListener('click', () => {
-        pepLabel.classList.remove('active');
-        eveLabel.classList.remove('active');
-        posLabel.classList.add('active');
-    });
-}
-function displayUsersData() {
-    const usersRef = ref(database, 'users');
-    if (pepDisp) {
-        onValue(usersRef, (snapshot: DataSnapshot) => {
-            pepDisp.innerHTML = '';
-            snapshot.forEach((childSnapshot: DataSnapshot) => {
-                const userData = childSnapshot.val();
-                const fullName = userData?.fullName ?? "Not set yet";
-                const major = userData?.major ?? "Not set yet";
-                const userDiv = document.createElement('div');
-                userDiv.classList.add('user-entry');
-                userDiv.style.marginBottom = '10px';
-                let fullMajor;
-                if (major != "Not set yet") {
-                    fullMajor = mapMajors(major);
+    displayUsersData() {
+        const usersRef = ref(database, 'users');
+        if (this.pepDisp) {
+            onValue(usersRef, (snapshot: DataSnapshot) => {
+                this.pepDisp!.innerHTML = '';
+                snapshot.forEach((childSnapshot: DataSnapshot) => {
+                    const userData = childSnapshot.val();
+                    const fullName = userData?.fullName ?? "Not set yet";
+                    const major = userData?.major ?? "Not set yet";
+                    const userDiv = document.createElement('div');
+                    userDiv.classList.add('user-entry');
+                    userDiv.style.marginBottom = '10px';
+                    let fullMajor = major != "Not set yet" ? this.mapMajors(major) : "Not set yet";
+
+                    userDiv.innerHTML = `
+                        <strong>Name:</strong> ${fullName} <br>
+                        <strong>Major:</strong> ${fullMajor}
+                    `;
+                    //the following is for pfp
+                    // const squareDiv = document.createElement('div');
+                    //squareDiv.classList.add('grey-square');
+                    //pepDisp.prepend(squareDiv);
+                    userDiv.classList.add('entry');
+                    userDiv.style.marginBottom = '10px';
+                    this.pepDisp!.appendChild(userDiv);
+                });
+            });
+        }
+    }
+
+    displayJobsData() {
+        const positionsRef = ref(database, 'jobs');
+        if (this.posDisp) {
+            onValue(positionsRef, (snapshot: DataSnapshot) => {
+                this.posDisp!.innerHTML = '';
+                snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                    const Refkey = levelSnapshot.key;
+                    const positionData = levelSnapshot.val();
+                    const { title, hourlyRateMin, hourlyRateMax, majors } = positionData;
+                    const fullMajors = this.mapMajors(majors);
+                    const positionDiv = document.createElement('div');
+                    positionDiv.classList.add('entry');
+                    positionDiv.style.marginBottom = '10px';
+                    positionDiv.innerHTML = `
+                        <strong>Title:</strong> ${title || "No Title"} <br>
+                        <strong>Hourly Rate Min:</strong> $${hourlyRateMin} <br>
+                        <strong>Hourly Rate Max:</strong> $${hourlyRateMax} <br>
+                        <strong>Majors:</strong> ${fullMajors.join(', ') || "No Majors"}
+                    `;
+                    positionDiv.addEventListener('click', () => {
+                        window.location.href = "viewJob.html?id=" + Refkey;
+
+                    });
+                    // the following is for pfp
+                    //const squareDiv = document.createElement('div');
+                    //squareDiv.classList.add('grey-square');
+                    ///positionDiv.prepend(squareDiv);
+                    this.posDisp!.appendChild(positionDiv);
+                });
+            });
+        }
+    }
+
+    mapMajors(majors: string[]): string[] {
+        const fullMajors: string[] = [];
+        Object.values(majorsByCollege).forEach(collegeMajors => {
+            collegeMajors.forEach(major => {
+                if (majors.includes(major.value)) {
+                    fullMajors.push(major.text);
                 }
-                else {
-                    fullMajor = "Not set yet"
-                }
-
-                userDiv.innerHTML = `
-        <strong>Name:</strong> ${fullName} <br>
-        <strong>Major:</strong> ${fullMajor}
-      `;
-                userDiv.classList.add('entry');
-                userDiv.style.marginBottom = '10px';
-                //the following is for pfp
-                // const squareDiv = document.createElement('div');
-                //squareDiv.classList.add('grey-square');
-                //pepDisp.prepend(squareDiv);
-                pepDisp.appendChild(userDiv);
-
-
             });
         });
+        return fullMajors;
     }
 }
-function displayJobsData() {
-    const positionsRef = ref(database, 'jobs');
-    if (posDisp) {
-        onValue(positionsRef, (snapshot: DataSnapshot) => {
-            posDisp.innerHTML = '';
-            snapshot.forEach((levelSnapshot: DataSnapshot) => {
-                //console.log("ls:",levelSnapshot);
-                const positionData = levelSnapshot.val();
-                const { title, hourlyRateMin, hourlyRateMax, majors } = positionData;
-                //console.log("ps:\n", positionData, "\nus\n:", levelSnapshot);
-                const fullMajors = mapMajors(majors);
-                const positionDiv = document.createElement('div');
-                positionDiv.classList.add('entry');
-                positionDiv.style.marginBottom = '10px';
-                positionDiv.innerHTML = `
-               <strong>Title:</strong> ${title || "No Title"} <br>
-               <strong>Hourly Rate Min:</strong> $${hourlyRateMin} <br>
-               <strong>Hourly Rate Max:</strong> $${hourlyRateMax} <br>
-               <strong>Majors:</strong> ${fullMajors.join(', ') || "No Majors"}
-               `;
-                // the following is for pfp
-                //const squareDiv = document.createElement('div');
-                //squareDiv.classList.add('grey-square');
-                ///positionDiv.prepend(squareDiv);
-                posDisp.appendChild(positionDiv);
-            });
-        });
 
-    }
-} function mapMajors(majors: string[]): string[] {
-    const fullMajors: string[] = [];
-    Object.values(majorsByCollege).forEach(collegeMajors => {
-        collegeMajors.forEach(major => {
-            if (majors.includes(major.value)) {
-                fullMajors.push(major.text);
-            }
-        });
-    });
-    return fullMajors;
-}
-window.onload = async () => {
+window.onload = () => {
+    const homepage = new Homepage();
     const pepRadioButton = document.getElementById('pep') as HTMLInputElement;
     if (pepRadioButton.checked) {
-        displayUsersData();
+        homepage.displayUsersData();
     }
-}
+};
