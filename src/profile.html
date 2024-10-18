@@ -83,18 +83,13 @@
             <input type="email" id="email" name="email" value="@mavs.uta.edu" readonly>
         </div>
 
-        <!-- College -->
-        <div class="form-section">
-            <label for="college"> College :</label>
-            <input type="text" id="college" name="college" value="" readonly>
-        </div>
-
+        
         <!-- Phone -->
         <div class="form-section">
             <label for="phone">Phone:</label>
-            <input type="text" id="phone" name="phone" value="" readonly>
+            <input type="tel" id="phone" name="phone" maxlength="12" value="" readonly>
         </div>
-
+        
         <!-- Role -->
         <div class="form-section">
             <label for="role">Role:</label>
@@ -104,34 +99,51 @@
                 <option value="staff">Staff</option>
             </select>
         </div>
-
-        <!-- Department -->
-        <div class="form-section">
-            <label for="department">Department:</label>
-            <select id="department" name="department" readonly>
-                <option value="CEng" selected>College of Engineering</option>
-                <option value="CS">College of Science</option>
-                <option value="CB">College of Business</option>
-                <!-- may add other options later -->
-            </select>
-        </div>
-
+        
+        <!-- Graduation Year -->
         <!-- Graduation Year -->
         <div class="form-section">
             <label for="graduation-year">Graduation Year:</label>
-            <input type="text" id="graduation-year" name="graduation-year" value="" readonly>
-        </div>
-
-        <!-- Major -->
-        <div class="form-section">
-            <label for="major">Major:</label>
-            <select id="major" name="major" readonly>
-                <option value="Computer Science" selected>Computer Science</option>
-                <option value="Mechanical Engineering">Mechanical Engineering</option>
-                <!-- Add other options as needed -->
+            <select id="graduation-year" name="graduation-year">
+                <option value="2028">2028</option>
+                <option value="2027">2027</option>
+                <option value="2026">2026</option>
+                <option value="2021">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
+                <option value="2019">2019</option>
+                <option value="2018">2018</option>
+                <option value="2017">2017</option>
+                
             </select>
         </div>
-
+        
+        <!-- College -->
+        <div class="form-section">
+        <label for="college">Desired College:</label>
+        <select id="college" name="college"> 
+            <option value="CAPPA">College of Architecture, Planning and Public Affairs</option>
+            <option value="CB">College of Business</option>
+            <option value="CE">College of Education</option>
+            <option value="CEng">College of Engineering</option>
+            <option value="CLA">College of Liberal Arts</option>
+            <option value="CNHI">College of Nursing and Health Innovation</option>
+            <option value="CS">College of Science</option>
+            <option value="SSW">School of Social Work</option>
+        </select>
+        </div>
+        <div class="form-section">
+      <!-- Major -->
+        <label for="major">Desired Majors:</label>
+        <select id="major" name="major"> 
+            <option> test</option>
+            <option> test</option>
+            <option> test</option>
+        </select>
+    </div>
         <!-- About Me -->
         <div class="form-section">
             <label for="about-me">About Me:</label>
@@ -141,6 +153,7 @@
         <!-- Edit Profile Button -->
         <div class="form-section">
             <button type="button" id="edit-profile-btn">Edit Profile</button>
+            <button type="submit" id="save-profile-btn" style="display: none;">Save Profile</button>
         </div>
     </form>
 </div>
