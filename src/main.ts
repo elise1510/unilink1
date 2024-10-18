@@ -26,7 +26,7 @@ function createWindow() {
 
       
     mainWindow.setMinimumSize(300, 300);
-    mainWindow.loadFile(path.join('../src/homepage.html'));
+    mainWindow.loadFile(path.join('../src/registration.html'));
   }
   app.whenReady().then(() => {
     createWindow();

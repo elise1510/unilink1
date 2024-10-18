@@ -314,3 +314,7 @@ tele.addEventListener('keyup', function(e: KeyboardEvent) {
     }
 });
 }
+const homeButton = document.getElementById("home") as HTMLInputElement;
+homeButton.addEventListener('click', () => {
+    window.location.href = "homepage.html";
+});

@@ -209,8 +209,15 @@ class Homepage {
     displayJobsData() {
         const positionsRef = ref(database, 'jobs');
         if (this.posDisp) {
+            const button = document.createElement("button");
+            button.textContent = "Create Job";
+            button.addEventListener("click", () => {
+                window.location.href = "createJob.html";
+            });
+            //this.posDisp!.appendChild(button);
             onValue(positionsRef, (snapshot: DataSnapshot) => {
                 this.posDisp!.innerHTML = '';
+                this.posDisp!.appendChild(button);
                 snapshot.forEach((levelSnapshot: DataSnapshot) => {
                     const Refkey = levelSnapshot.key;
                     const positionData = levelSnapshot.val();
@@ -236,6 +243,7 @@ class Homepage {
                     this.posDisp!.appendChild(positionDiv);
                 });
             });
+            
         }
     }
 
