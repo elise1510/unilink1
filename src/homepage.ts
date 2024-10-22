@@ -182,6 +182,7 @@ class Homepage {
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
+                    const refKey = childSnapshot.key;
                     const userData = childSnapshot.val();
                     const fullName = userData?.fullName ?? "Not set yet";
                     const major = userData?.major ?? "Not set yet";
@@ -200,6 +201,10 @@ class Homepage {
                     //pepDisp.prepend(squareDiv);
                     userDiv.classList.add('entry');
                     userDiv.style.marginBottom = '10px';
+                    userDiv.addEventListener('click', () => {
+                        window.location.href = "viewUser.html?id=" + refKey;
+
+                    });
                     this.pepDisp!.appendChild(userDiv);
                 });
             });

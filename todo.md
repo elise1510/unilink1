@@ -13,6 +13,7 @@
 # General - Any
 - [ ] homepage HTML - high priority
 - [ ] all CSS - low priority
+- [ ] remove not needed imports
 # Reg - Elise 
 - [ ] go to hompage -> dependency Homepage
 - [ ] Remove Username
