@@ -179,8 +179,19 @@ class Homepage {
     displayUsersData() {
         const usersRef = ref(database, 'users');
         if (this.pepDisp) {
+            const button = document.createElement("button");
+            button.textContent = "See Chat Requests";
+            button.addEventListener("click", async () => {
+                const userString = localStorage.getItem('userinfo');
+                if (userString) {
+                    const user = JSON.parse(userString);
+                    const uid = user.uid;
+                    window.location.href = "chat.html?id=" + uid;
+                }
+            });
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
+                this.pepDisp!.appendChild(button);
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
                     const refKey = childSnapshot.key;
                     const userData = childSnapshot.val();
@@ -205,6 +216,7 @@ class Homepage {
                         window.location.href = "viewUser.html?id=" + refKey;
 
                     });
+                    
                     this.pepDisp!.appendChild(userDiv);
                 });
             });

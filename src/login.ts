@@ -44,9 +44,9 @@ class UserLogin {
                 credentials: userCredential,
                 user: userCredential.user
             }));
-    
-            
-           window.location.href = 'profile.html';
+
+
+            window.location.href = 'profile.html';
 
         } catch (error: any) {
             if (error.code === 'auth/user-not-found') {
@@ -79,7 +79,18 @@ class UserLogin {
         }
         return true;
     }
+    static async autoLogin(): Promise<void> {
+        const savedUser = localStorage.getItem('userinfo');
+        if (savedUser) {
+            const { email, password } = JSON.parse(savedUser);
+            if (email && password) {
+                const userLogin = new UserLogin(email, password);
+                await userLogin.login();
+            }
+        }
+    }
 }
+
 
 
 const form = document.getElementById('loginForm') as HTMLFormElement;
@@ -92,8 +103,8 @@ form.addEventListener('submit', async (event) => {
     if (UserLogin.validateForm(email, password)) {
         const userLogin = new UserLogin(email, password);
         await userLogin.login();
-        
-       
+
+
     }
 });
 
@@ -102,3 +113,7 @@ document.getElementById('register')?.addEventListener('click', () => {
     console.log('reg');
     window.location.href = 'registration.html';
 });
+
+window.onload = async () => {
+    await UserLogin.autoLogin(); // Attempt autologin if credentials are saved
+};

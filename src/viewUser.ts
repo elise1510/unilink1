@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, onValue, DataSnapshot, get, child } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, onValue, DataSnapshot, get, child,set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -110,6 +110,67 @@ homeButton.addEventListener('click', () => {
 });
 
 const friendRequestButton = document.getElementById("req") as HTMLInputElement;
+const modal = document.getElementById("messageModal") as HTMLElement;
+const closeModalButton = document.querySelector(".close") as HTMLElement;
+const sendMessageButton = document.getElementById("sendMessageButton") as HTMLButtonElement;
+
+friendRequestButton.addEventListener('click', async () => {
+    modal.style.display = "block";
+});
+
+closeModalButton.addEventListener('click', () => {
+    modal.style.display = "none"; 
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        modal.style.display = "none"; 
+    }
+});
+
+sendMessageButton.addEventListener('click', async () => {
+    const messageInput = (document.getElementById("messageInput") as HTMLTextAreaElement).value;
+
+    if (messageInput.trim()) {
+        const urlParams = new URLSearchParams(window.location.search);
+        let friendId = urlParams.get('id');
+        let friendEmail, email, abvEmail, abvFriendEmail;
+
+        const friendRef = ref(database, 'users/' + friendId);
+        const friendSnapshot = await get(friendRef);
+
+        if (friendSnapshot.exists()) {
+            const userData = friendSnapshot.val();
+            friendEmail = userData?.email;
+            abvFriendEmail = friendEmail.split('@')[0];
+        }
+
+        const userString = localStorage.getItem('userinfo');
+        if (userString) {
+            const user = JSON.parse(userString);
+            const userRef = ref(database, 'users/' + user.uid);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                email = userData?.email;
+                abvEmail = email.split('@')[0];
+            }
+
+    
+            set(ref(database, 'chatRequests/' + abvEmail + abvFriendEmail), {
+                accepted: false,
+                rejected: false,
+                sender: email,
+                receiver: friendEmail,
+                msgPreview: messageInput
+            });
+
+
+            modal.style.display = "none";
+        }
+    }
+});
 class UserViewer {
     private userId: string | null;
 
