@@ -130,15 +130,15 @@ window.addEventListener('click', (event) => {
 
 sendMessageButton.addEventListener('click', async () => {
     const messageInput = (document.getElementById("messageInput") as HTMLTextAreaElement).value;
-
-    if (messageInput.trim()) {
+ 
+    if (messageInput) {
         const urlParams = new URLSearchParams(window.location.search);
         let friendId = urlParams.get('id');
         let friendEmail, email, abvEmail, abvFriendEmail;
 
         const friendRef = ref(database, 'users/' + friendId);
         const friendSnapshot = await get(friendRef);
-
+  
         if (friendSnapshot.exists()) {
             const userData = friendSnapshot.val();
             friendEmail = userData?.email;
@@ -146,15 +146,17 @@ sendMessageButton.addEventListener('click', async () => {
         }
 
         const userString = localStorage.getItem('userinfo');
-        if (userString) {
+        
+        if (userString) { 
             const user = JSON.parse(userString);
             const userRef = ref(database, 'users/' + user.uid);
             const snapshot = await get(userRef);
-
+            
             if (snapshot.exists()) {
                 const userData = snapshot.val();
+                console.log(userData);
                 email = userData?.email;
-                abvEmail = email.split('@')[0];
+                abvEmail = email!.split('@')[0];
             }
 
     

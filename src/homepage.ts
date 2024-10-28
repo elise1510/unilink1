@@ -189,9 +189,24 @@ class Homepage {
                     window.location.href = "chat.html?id=" + uid;
                 }
             });
+            const seeProfileButton = document.createElement("button");
+            seeProfileButton.textContent = "See Profile";
+            seeProfileButton.addEventListener("click", () => {
+                window.location.href = "profile.html";
+            });
+
+            const logoutButton = document.createElement("button");
+            logoutButton.textContent = "Logout";
+            logoutButton.addEventListener("click", () => {
+                localStorage.clear();
+                window.location.href = "login.html";
+            });
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
                 this.pepDisp!.appendChild(button);
+                this.pepDisp!.appendChild(seeProfileButton);
+                this.pepDisp!.appendChild(logoutButton);
+
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
                     const refKey = childSnapshot.key;
                     const userData = childSnapshot.val();
@@ -216,7 +231,7 @@ class Homepage {
                         window.location.href = "viewUser.html?id=" + refKey;
 
                     });
-                    
+
                     this.pepDisp!.appendChild(userDiv);
                 });
             });
@@ -231,6 +246,7 @@ class Homepage {
             button.addEventListener("click", () => {
                 window.location.href = "createJob.html";
             });
+
             //this.posDisp!.appendChild(button);
             onValue(positionsRef, (snapshot: DataSnapshot) => {
                 this.posDisp!.innerHTML = '';
@@ -260,7 +276,7 @@ class Homepage {
                     this.posDisp!.appendChild(positionDiv);
                 });
             });
-            
+
         }
     }
 

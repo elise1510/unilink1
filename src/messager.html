@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+  <style>
+    #header {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px;
+    }
+
+    .msg-holder {
+      width: 100%;
+      height: 70vh;
+      border: 1px solid #ccc;
+      overflow-y: scroll;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .msg-typer {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+    }
+
+    .msg-typer input {
+      width: 85%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .msg-typer button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Button Styles */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px;
+    }
+
+    .nav-buttons button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      color: white;
+    }
+
+    #back-btn {
+      background-color: #007BFF;
+    }
+
+    #home-btn {
+      background-color: #28A745;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-buttons">
+    <button id="back-btn">Back</button>
+    <button id="home-btn">Home</button>
+  </div>
+
+  <div id="header">
+    Username
+  </div>
+
+  <div class="msg-holder" id="msg">
+    <!-- Chat messages will be loaded here -->
+  </div>
+
+  <div class="msg-typer">
+    <input type="text" id="message-input" placeholder="Type your message here..." />
+    <button id="send-btn">Send</button>
+  </div>
+
+  <script type="module" src="../dist/messager.js"></script>
+  <script>
+    // Navigation buttons logic
+    document.getElementById('back-btn').addEventListener('click', () => {
+      window.location.href = 'chat.html';  // Navigate to chat.html
+    });
+
+    document.getElementById('home-btn').addEventListener('click', () => {
+      window.location.href = 'homepage.html';  // Navigate to home.html
+    });
+  </script>
+
+</body>
+</html>

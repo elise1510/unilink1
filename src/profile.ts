@@ -161,6 +161,7 @@ class UserProfile {
             const snapshot = await get(child(dbRef, `users/${uid}`));
             if (snapshot.exists()) {
                 const data = snapshot.val();
+                console.log(data);
                 (document.getElementById('name') as HTMLInputElement).value = data.fullName;
                 (document.getElementById('email') as HTMLInputElement).value = data.email;
                 (document.getElementById('phone') as HTMLInputElement).value = data.phone;
@@ -293,10 +294,6 @@ window.onload = async () => {
     const userString = localStorage.getItem('userinfo');
     if (userString) {
         const user = JSON.parse(userString);
-        await loadUserData(user.uid);
-    // Now you can safely access user.uid
-    console.log('User ID:', user.uid);
-    console.log("user:",user);
         console.log("Current User:", user);
         const uid = user.uid;
         await UserProfile.loadProfile(uid)
