@@ -42,12 +42,13 @@
 - [X] Link to homepage -> Homepage
 - [ ] Link from homepage -> Homepage
 - [ ] If staff, no major (important)
-- [ ] PFP and PFP Croping(important)
+- [X] PFP
+- [ ] PFP Croping(IMPORTANT)
 - [ ] Submit resume (important)
 
 
 # Homepage - Elise
-## Click on User Profile
+- [ ] PFP Croping(IMPORTANT)
 
 # Search and Filter - Zobia
 
