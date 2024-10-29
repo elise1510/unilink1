@@ -224,14 +224,14 @@ class Homepage {
                         <strong>Major:</strong> ${fullMajor}
                     `;
                     //the following is for pfp
- const squareDiv = document.createElement('div');
+                    const squareDiv = document.createElement('div');
                     const storage = getStorage();
                     const profilePicRef = storageRef(storage, `profile-pictures/${refKey}`);
                     if (profilePicRef) {
-                        
+
                         getDownloadURL(profilePicRef)
-                            .then((downloadURL:string) => {
-                               
+                            .then((downloadURL: string) => {
+
                                 squareDiv.classList.add('grey-square');
 
                                 // Ensure pepDisp exists before prepending
@@ -249,7 +249,7 @@ class Homepage {
                                     squareDiv.appendChild(profileImage);
                                 }
                             })
-                            .catch((error:any) => {
+                            .catch((error: any) => {
                                 console.error("Error fetching profile picture:", error);
                             });
                     }
@@ -303,9 +303,35 @@ class Homepage {
 
                     });
                     // the following is for pfp
-                    //const squareDiv = document.createElement('div');
-                    //squareDiv.classList.add('grey-square');
-                    ///positionDiv.prepend(squareDiv);
+                    const squareDiv = document.createElement('div');
+                    const storage = getStorage();
+                    const profilePicRef = storageRef(storage, `jobLogos/${Refkey}`);
+                    if (profilePicRef) {
+
+                        getDownloadURL(profilePicRef)
+                            .then((downloadURL: string) => {
+
+                                squareDiv.classList.add('grey-square');
+
+                                // Ensure pepDisp exists before prepending
+                                if (positionDiv) {
+                                    positionDiv.prepend(squareDiv);
+
+                                    const profileImage = document.createElement('img');
+                                    profileImage.id = 'profileImage';
+                                    profileImage.src = downloadURL; // Set the profile image source to the download URL
+                                    profileImage.alt = 'Profile Picture';
+                                    profileImage.style.width = '100%'; // Adjust as necessary
+                                    profileImage.style.height = '100%'; // Adjust as necessary
+                                    profileImage.style.objectFit = 'cover'; // Ensure the image fits nicely
+
+                                    squareDiv.appendChild(profileImage);
+                                }
+                            })
+                            .catch((error: any) => {
+                                console.error("Error fetching profile picture:", error);
+                            });
+                    }
                     this.posDisp!.appendChild(positionDiv);
                 });
             });
