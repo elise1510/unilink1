@@ -130,6 +130,7 @@ class JobViewer {
 
     private displayJobData(jobData: any) {
         /*About*/
+        this.displayJobLogo();
         this.setElementTextContent("about", jobData?.about, "not set");
         /*Title*/
         this.setElementTextContent("title", jobData?.title, "not set");
@@ -247,6 +248,29 @@ class JobViewer {
     
         hourlyRateMin!.textContent = rateText;
         hourlyRateMax!.textContent = "";
+    }
+    private async displayJobLogo() {
+        const jobRef = ref(database, 'jobs/' + this.jobId);
+        
+        try {
+            const snapshot: DataSnapshot = await get(jobRef);
+            
+            if (snapshot.exists()) {
+                const jobData = snapshot.val();
+                const logoUrl = jobData.logo;
+    
+                const logoImage = document.getElementById('logo-image') as HTMLImageElement;
+                if (logoUrl) {
+                    logoImage.src = logoUrl;
+                } else {
+                    console.log('No logo URL found for this job.');
+                }
+            } else {
+                console.log('No job data found for the provided job ID.');
+            }
+        } catch (error) {
+            console.error('Error fetching job logo:', error);
+        }
     }
 }
 
