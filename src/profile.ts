@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
-
+const storage = getStorage();
 //majors
 const majorsByCollege = {
     CAPPA: [
@@ -333,7 +333,7 @@ document.getElementById("uploadProfileBtn")?.addEventListener("click", async () 
         fileInput.onchange = async (e) => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
-                const storage = getStorage();
+                
                 const storageRefPath = storageRef(storage, 'profile-pictures/' + uid);
 
                 const uploadTask = uploadBytesResumable(storageRefPath, file);
@@ -389,3 +389,50 @@ async function loadProfilePicture() {
         }
     }
 }
+document.getElementById("uploadResBtn")?.addEventListener("click", async () => {
+    const userString = localStorage.getItem('userinfo');
+    if (userString) {
+        const user = JSON.parse(userString);
+        const uid = user.uid;
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.doc,.docx,.pdf'
+        fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const storage = getStorage();
+                const storageRefPath = storageRef(storage, 'resume/' + uid);
+
+                const uploadTask = uploadBytesResumable(storageRefPath, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot: UploadTaskSnapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    },
+                    (error: any) => {
+                        console.error("Upload failed:", error);
+                    },
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL: string) => {
+                            const db = getDatabase();
+                            const profileUpdates = {
+                                ['profile-pictures/' + uid]: downloadURL
+                            };
+
+                            update(ref(db), profileUpdates).catch((error: any) => {
+                                console.error("Error updating profile:", error);
+                            });
+                        }).catch((error: any) => {
+                            console.error("Error getting download URL:", error);
+                        });
+                    }
+                );
+            }
+        };
+    } else {
+        console.error("User not found in localStorage");
+    }
+});

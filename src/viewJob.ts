@@ -3,7 +3,9 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, onValue, DataSnapshot, get, child } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, onValue, DataSnapshot, get, set, child } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+//@ts-ignore
+import { getStorage,  ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -107,7 +109,7 @@ const majorsByCollege = {
 
 
 class JobViewer {
-    private jobId: string | null;
+    public jobId: string | null;
 
     constructor() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -251,11 +253,72 @@ class JobViewer {
 window.onload = () => {
     const viewer = new JobViewer();
     viewer.getData();
-};
+
+
+
+    const ResButton = document.getElementById("res") as HTMLInputElement;
+
+    ResButton?.addEventListener("click", async () => {
+        const userString = localStorage.getItem('userinfo');
+    
+        if (userString) {
+            const user = JSON.parse(userString);
+            const uid = user.uid;
+            const jobId = viewer.jobId; 
+    
+            if (jobId) {
+                const db = getDatabase();
+                const jobRef = ref(db, `jobs/${jobId}`);
+                const applicantsRef = ref(db, `jobs/${jobId}/applicants`);
+    
+               
+                let messageElement = document.getElementById("message");
+                if (!messageElement) {
+                    messageElement = document.createElement("div");
+                    messageElement.id = "message";
+                    document.body.appendChild(messageElement); 
+                }
+    
+                try {
+                   
+                    const jobSnapshot = await get(jobRef);
+                    if (jobSnapshot.exists()) {
+                        const jobData = jobSnapshot.val();
+                        const maxApplicants = jobData.maxApplicants;
+                        const applicants = jobData.applicants ? Object.values(jobData.applicants) : [];
+                        const currentApplicants = applicants.length;
+    
+                       
+                        if (applicants.includes(uid)) {
+                            messageElement.textContent = "You have already applied for this job.";
+                        } else if (currentApplicants < maxApplicants) {
+                            
+                            applicants.push(uid);
+                            await set(applicantsRef, applicants);
+                            messageElement.textContent = "You have successfully applied for the job.";
+                        } else {
+                            
+                            messageElement.textContent = "This job is full.";
+                        }
+                    } else {
+                        messageElement.textContent = "Job not found.";
+                    }
+                } catch (error) {
+                    console.error("Error fetching job details:", error);
+                    messageElement.textContent = "Error applying for the job.";
+                }
+            } else {
+                console.error("Job ID not available.");
+            }
+        } else {
+            console.error("User not found in localStorage");
+        }
+    });
+    
+};    
 
 const homeButton = document.getElementById("home") as HTMLInputElement;
 homeButton.addEventListener('click', () => {
     window.location.href = "homepage.html";
-});
+});    
 
-const ResButton = document.getElementById("res") as HTMLInputElement;

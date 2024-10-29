@@ -4,7 +4,8 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
 import { getDatabase, ref, set, DataSnapshot, onValue, get, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
-import { doc } from 'firebase/firestore/lite';
+//@ts-ignore
+import { getStorage,  ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,6 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
+const storage = getStorage();
 //majors
 const majorsByCollege = {
     CAPPA: [
@@ -123,7 +125,8 @@ class CreateJob {
     college: string[];
     majors: string[];
     maxApplicants: number;
-    // TODO: Logo
+    applicationType: string[];
+    logoFile: File | null;
 
     constructor() {
         this.about = (document.getElementById('about') as HTMLInputElement).value;
@@ -140,6 +143,8 @@ class CreateJob {
         this.college = Array.from((document.getElementById('college') as HTMLSelectElement).selectedOptions).map(opt => opt.value);
         this.majors = Array.from((document.getElementById('majors') as HTMLSelectElement).selectedOptions).map(opt => opt.value);
         this.maxApplicants = parseInt((document.getElementById('max-applications') as HTMLInputElement).value);
+        this.applicationType = Array.from((document.getElementById('application-type') as HTMLSelectElement).selectedOptions).map(opt => opt.value); 
+        this.logoFile = (document.getElementById('logo') as HTMLInputElement).files?.[0] || null;
     }
      async saveJob(uid: string) {
         let now: Date =  new Date();
@@ -168,9 +173,15 @@ class CreateJob {
         if(check === true && change === true){
             uniqueKey = uniqueKey + i;
         }
-
+        let logoUrl = '';
+        if (this.logoFile) {
+            const sref = storageRef(storage, 'jobLogos/'+uniqueKey);
+            await uploadBytesResumable(sref, this.logoFile); 
+            logoUrl = await getDownloadURL(sref);
+        }
         try {
-            await set(ref(database, 'jobs/' + uniqueKey), {
+            if(this.logoFile)
+            {await set(ref(database, 'jobs/' + uniqueKey), {
                 uid: uid,
                 about: this.about,
                 title: this.title,
@@ -186,9 +197,33 @@ class CreateJob {
                 college: this.college,
                 majors: this.majors,
                 maxApplicants: this.maxApplicants,
+                applicationType: this.applicationType,
+                logo: logoUrl,
                 DatePosted: now,
                 postedBy: poster
-            });
+            });}
+            else{
+                await set(ref(database, 'jobs/' + uniqueKey), {
+                    uid: uid,
+                    about: this.about,
+                    title: this.title,
+                    repons: this.repons,
+                    gradeLevels: this.gradeLevels,
+                    expirence: this.expirence,
+                    time: this.time,
+                    workload: this.workload,
+                    type: this.type,
+                    hourlyRateMin: this.hourlyRateMin,
+                    hourlyRateMax: this.hourlyRateMax,
+                    expirationDate: this.expirationDate,
+                    college: this.college,
+                    majors: this.majors,
+                    maxApplicants: this.maxApplicants,
+                    applicationType: this.applicationType,
+                    DatePosted: now,
+                    postedBy: poster
+                }); 
+            }
             console.log('User role saved to Realtime Database successfully.');
         } catch (error) {
             console.error('Error saving user role:', error);
