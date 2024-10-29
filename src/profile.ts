@@ -333,7 +333,7 @@ document.getElementById("uploadProfileBtn")?.addEventListener("click", async () 
         fileInput.onchange = async (e) => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
-                
+                const storage = getStorage(); // Ensure storage is initialized
                 const storageRefPath = storageRef(storage, 'profile-pictures/' + uid);
 
                 const uploadTask = uploadBytesResumable(storageRefPath, file);
@@ -341,23 +341,29 @@ document.getElementById("uploadProfileBtn")?.addEventListener("click", async () 
                 uploadTask.on('state_changed',
                     (snapshot: UploadTaskSnapshot) => {
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log(`Upload is ${progress}% done`);
                     },
                     (error: any) => {
                         console.error("Upload failed:", error);
                     },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL: string) => {
+                    async () => {
+                        try {
+                            const downloadURL: string = await getDownloadURL(uploadTask.snapshot.ref);
+                            console.log("File available at:", downloadURL);
+
                             const db = getDatabase();
                             const profileUpdates = {
                                 ['profile-pictures/' + uid]: downloadURL
                             };
 
-                            update(ref(db), profileUpdates).catch((error: any) => {
-                                console.error("Error updating profile:", error);
-                            });
-                        }).catch((error: any) => {
-                            console.error("Error getting download URL:", error);
-                        });
+                            await update(ref(db), profileUpdates);
+                            console.log("Profile picture URL updated in Realtime Database.");
+
+                            // Load the profile picture after updating the URL
+                            loadProfilePicture();
+                        } catch (error) {
+                            console.error("Error getting download URL or updating database:", error);
+                        }
                     }
                 );
             }
@@ -381,6 +387,7 @@ async function loadProfilePicture() {
         try {
             const downloadURL: string = await getDownloadURL(profilePicRef);
             const profileImage: HTMLImageElement | null = document.getElementById('profileImage') as HTMLImageElement;
+            console.log(profileImage);
             if (profileImage) {
                 profileImage.src = downloadURL;
             }
@@ -405,31 +412,38 @@ document.getElementById("uploadResBtn")?.addEventListener("click", async () => {
             if (file) {
                 const storage = getStorage();
                 const storageRefPath = storageRef(storage, 'resume/' + uid);
-
+                console.log("Starting file upload...");
                 const uploadTask = uploadBytesResumable(storageRefPath, file);
 
                 uploadTask.on('state_changed',
                     (snapshot: UploadTaskSnapshot) => {
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                       // console.log('Upload is ' + progress + '% done');
                     },
                     (error: any) => {
                         console.error("Upload failed:", error);
                     },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL: string) => {
+                    async () => {
+                        try {
+                            const downloadURL: string = await getDownloadURL(uploadTask.snapshot.ref);
+                            console.log("File uploaded successfully. Download URL:", downloadURL);
+
                             const db = getDatabase();
                             const profileUpdates = {
-                                ['profile-pictures/' + uid]: downloadURL
+                                ['resume/' + uid]: downloadURL 
                             };
 
-                            update(ref(db), profileUpdates).catch((error: any) => {
-                                console.error("Error updating profile:", error);
-                            });
-                        }).catch((error: any) => {
-                            console.error("Error getting download URL:", error);
-                        });
+                            await update(ref(db), profileUpdates);
+                            console.log("Resume URL updated successfully in Realtime Database.");
+
+                           
+                        } catch (error) {
+                            console.error("Error handling file upload or updating database:", error);
+                        }
                     }
                 );
+            } else {
+                console.error("No file selected.");
             }
         };
     } else {
