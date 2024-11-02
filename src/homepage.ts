@@ -111,6 +111,8 @@ class Homepage {
     private pepLabel: HTMLElement | null;
     private eveLabel: HTMLElement | null;
     private posLabel: HTMLElement | null;
+    private searchInput: HTMLInputElement | null;
+    private searchButton: HTMLButtonElement | null;
 
     constructor() {
         this.pepDisp = document.querySelector('.pep-disp');
@@ -119,8 +121,60 @@ class Homepage {
         this.pepLabel = document.getElementById('pep-label');
         this.eveLabel = document.getElementById('eve-label');
         this.posLabel = document.getElementById('pos-label');
+        this.searchInput = document.getElementById('search-input') as HTMLInputElement;
+        this.searchButton = document.getElementById('search-button') as HTMLButtonElement;
+
         this.initTabListeners();
+        this.initSearchListener();
         this.initLabelListeners();
+    }
+
+    filterUsersData(searchTerm: string) {
+        const usersRef = ref(database, 'users');
+        onValue(usersRef, (snapshot: DataSnapshot) => {
+            this.pepDisp!.innerHTML = '';
+            snapshot.forEach((childSnapshot: DataSnapshot) => {
+                const userData = childSnapshot.val();
+                const fullName = userData?.fullName ?? "Not set yet";
+                const major = userData?.major ?? "Not set yet";
+                const userDiv = document.createElement('div');
+                userDiv.classList.add('user-entry');
+                userDiv.style.marginBottom = '10px';
+
+                if (fullName.toLowerCase().includes(searchTerm) || major.toLowerCase().includes(searchTerm)) {
+                    userDiv.innerHTML = `
+                        <strong>Name:</strong> ${fullName} <br>
+                        <strong>Major:</strong> ${this.mapMajors(major).join(', ') || "Not set yet"}
+                    `;
+                    this.pepDisp!.appendChild(userDiv);
+                }
+            });
+        });
+    }
+
+    filterJobsData(searchTerm: string) {
+        const positionsRef = ref(database, 'jobs');
+        onValue(positionsRef, (snapshot: DataSnapshot) => {
+            this.posDisp!.innerHTML = '';
+            snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                const positionData = levelSnapshot.val();
+                const title = positionData.title || "No Title";
+                const fullMajors = this.mapMajors(positionData.majors).join(', ');
+                const positionDiv = document.createElement('div');
+                positionDiv.classList.add('entry');
+                positionDiv.style.marginBottom = '10px';
+
+                if (title.toLowerCase().includes(searchTerm) || fullMajors.toLowerCase().includes(searchTerm)) {
+                    positionDiv.innerHTML = `
+                        <strong>Title:</strong> ${title} <br>
+                        <strong>Hourly Rate Min:</strong> $${positionData.hourlyRateMin} <br>
+                        <strong>Hourly Rate Max:</strong> $${positionData.hourlyRateMax} <br>
+                        <strong>Majors:</strong> ${fullMajors || "No Majors"}
+                    `;
+                    this.posDisp!.appendChild(positionDiv);
+                }
+            });
+        });
     }
 
     initTabListeners() {
@@ -176,6 +230,19 @@ class Homepage {
         }
     }
 
+
+    initSearchListener() {
+        if (this.searchButton) {
+            this.searchButton.addEventListener('click', () => {
+                const searchTerm = this.searchInput?.value.toLowerCase().trim(); // Added trim to remove whitespace
+                if (!searchTerm) {
+                    alert("Please enter a search term."); 
+                    return; // Exit if no search term is provided
+                }
+                this.filterJobsData(searchTerm);
+            });
+        }
+    }
     displayUsersData() {
         const usersRef = ref(database, 'users');
         if (this.pepDisp) {

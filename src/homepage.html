@@ -57,6 +57,40 @@
       padding-bottom: 50px;
     }
 
+    .search-bar-container {
+      margin: 10px auto;
+      width: 80%;
+      max-width: 400px;
+      padding: 5px;
+      display: flex;
+      justify-content: center; /* Centers content horizontally */
+    }
+
+    /* Styling for the search bar input */
+    .search-bar {
+      flex: 1;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px 0 0 5px;
+    }
+
+    /* Styling for the search button */
+    .search-button {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-left: none; /* Removes border between input and button */
+      background-color: #000000;
+      color: white;
+      cursor: pointer;
+      border-radius: 0 5px 5px 0; /* Rounds only right corners */
+    }
+
+    .search-button:hover {
+      background-color: #0f0f0f;
+    }
+
     .container input {
       position: absolute;
       opacity: 0;
@@ -136,6 +170,13 @@
         <span class="checkmark"></span>
     </label>
 </div>
+
+<div class="search-bar-container">
+  <input type="text" class="search-bar" id="search-bar" placeholder="Search...">
+  <button class="search-button" id="search-button">Search</button>
+</div>
+
+
 <div class="pep-disp" id = "pep-disp">
     People
 </div>
