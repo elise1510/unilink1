@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, onValue, DataSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, get, ref, onValue, DataSnapshot, update } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 //@ts-ignore
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
@@ -107,243 +107,625 @@ const majorsByCollege = {
     ]
 };
 class Homepage {
-    private pepDisp: HTMLElement | null;
-    private eveDisp: HTMLElement | null;
-    private posDisp: HTMLElement | null;
-    private pepLabel: HTMLElement | null;
-    private eveLabel: HTMLElement | null;
-    private posLabel: HTMLElement | null;
-
+    private accDisp: HTMLElement | null;
+    private newDisp: HTMLElement | null;
+    private rejDisp: HTMLElement | null;
+    private accLabel: HTMLElement | null;
+    private newLabel: HTMLElement | null;
+    private rejLabel: HTMLElement | null;
+    private jobId: string | null;
     constructor() {
-        this.pepDisp = document.querySelector('.pep-disp');
-        this.eveDisp = document.querySelector('.eve-disp');
-        this.posDisp = document.querySelector('.pos-disp');
-        this.pepLabel = document.getElementById('pep-label');
-        this.eveLabel = document.getElementById('eve-label');
-        this.posLabel = document.getElementById('pos-label');
+        this.accDisp = document.querySelector('.acc-disp');
+        this.newDisp = document.querySelector('.new-disp');
+        this.rejDisp = document.querySelector('.rej-disp');
+        this.accLabel = document.getElementById('acc-label');
+        this.newLabel = document.getElementById('new-label');
+        this.rejLabel = document.getElementById('rej-label');
+        const urlParams = new URLSearchParams(window.location.search);
+        this.jobId = urlParams.get('id');
         this.initTabListeners();
         this.initLabelListeners();
     }
-
     initTabListeners() {
         document.querySelectorAll('input[name="tab"]').forEach((radio) => {
             const inputRadio = radio as HTMLInputElement;
 
             inputRadio.addEventListener('change', () => {
-                if (inputRadio.value === 'pep' && this.pepDisp && this.eveDisp && this.posDisp) {
-                    this.pepDisp.classList.add('active');
-                    this.pepDisp.style.display = 'block';
-                    this.eveDisp.classList.remove('active');
-                    this.eveDisp.style.display = 'none';
-                    this.posDisp.classList.remove('active');
-                    this.posDisp.style.display = 'none';
-                    this.displayUsersData();
-                } else if (inputRadio.value === 'eve' && this.pepDisp && this.eveDisp && this.posDisp) {
-                    this.pepDisp.classList.remove('active');
-                    this.pepDisp.style.display = 'none';
-                    this.eveDisp.classList.add('active');
-                    this.eveDisp.style.display = 'block';
-                    this.posDisp.classList.remove('active');
-                    this.posDisp.style.display = 'none';
-                } else if (inputRadio.value === 'pos' && this.pepDisp && this.eveDisp && this.posDisp) {
-                    this.pepDisp.classList.remove('active');
-                    this.pepDisp.style.display = 'none';
-                    this.eveDisp.classList.remove('active');
-                    this.eveDisp.style.display = 'none';
-                    this.posDisp.classList.add('active');
-                    this.posDisp.style.display = 'block';
-                    this.displayJobsData();
+                if (inputRadio.value === 'acc' && this.accDisp && this.newDisp && this.rejDisp) {
+                    this.accDisp.classList.add('active');
+                    this.accDisp.style.display = 'block';
+                    this.newDisp.classList.remove('active');
+                    this.newDisp.style.display = 'none';
+                    this.rejDisp.classList.remove('active');
+                    this.rejDisp.style.display = 'none';
+                    this.displayAcc();
+                } else if (inputRadio.value === 'new' && this.accDisp && this.newDisp && this.rejDisp) {
+                    this.accDisp.classList.remove('active');
+                    this.accDisp.style.display = 'none';
+                    this.newDisp.classList.add('active');
+                    this.newDisp.style.display = 'block';
+                    this.rejDisp.classList.remove('active');
+                    this.rejDisp.style.display = 'none';
+                    this.displayNew();
+                } else if (inputRadio.value === 'rej' && this.accDisp && this.newDisp && this.rejDisp) {
+                    this.accDisp.classList.remove('active');
+                    this.accDisp.style.display = 'none';
+                    this.newDisp.classList.remove('active');
+                    this.newDisp.style.display = 'none';
+                    this.rejDisp.classList.add('active');
+                    this.rejDisp.style.display = 'block';
+                    //this.displayJobsData();
                 }
             });
         });
     }
 
     initLabelListeners() {
-        if (this.pepLabel && this.posLabel && this.eveLabel) {
-            this.pepLabel.addEventListener('click', () => {
-                this.pepLabel!.classList.add('active');
-                this.eveLabel!.classList.remove('active');
-                this.posLabel!.classList.remove('active');
+        if (this.accLabel && this.rejLabel && this.newLabel) {
+            this.accLabel.addEventListener('click', () => {
+                this.accLabel!.classList.add('active');
+                this.newLabel!.classList.remove('active');
+                this.rejLabel!.classList.remove('active');
             });
-            this.eveLabel.addEventListener('click', () => {
-                this.pepLabel!.classList.remove('active');
-                this.eveLabel!.classList.add('active');
-                this.posLabel!.classList.remove('active');
+            this.newLabel.addEventListener('click', () => {
+                this.accLabel!.classList.remove('active');
+                this.newLabel!.classList.add('active');
+                this.rejLabel!.classList.remove('active');
             });
-            this.posLabel.addEventListener('click', () => {
-                this.pepLabel!.classList.remove('active');
-                this.eveLabel!.classList.remove('active');
-                this.posLabel!.classList.add('active');
+            this.rejLabel.addEventListener('click', () => {
+                this.accLabel!.classList.remove('active');
+                this.newLabel!.classList.remove('active');
+                this.rejLabel!.classList.add('active');
             });
         }
     }
 
-    displayUsersData() {
-        const usersRef = ref(database, 'users');
-        if (this.pepDisp) {
-            const button = document.createElement("button");
-            button.textContent = "See Chat Requests";
-            button.addEventListener("click", async () => {
-                const userString = localStorage.getItem('userinfo');
-                if (userString) {
-                    const user = JSON.parse(userString);
-                    const uid = user.uid;
-                    window.location.href = "chat.html?id=" + uid;
-                }
-            });
-            const seeProfileButton = document.createElement("button");
-            seeProfileButton.textContent = "See Profile";
-            seeProfileButton.addEventListener("click", () => {
-                window.location.href = "profile.html";
-            });
+    async displayAcc() {
+        const jobRef = ref(database, `jobs/${this.jobId}`);
+        const jobSnapshot = await get(jobRef);
 
-            const logoutButton = document.createElement("button");
-            logoutButton.textContent = "Logout";
-            logoutButton.addEventListener("click", () => {
-                localStorage.clear();
-                window.location.href = "login.html";
-            });
-            onValue(usersRef, (snapshot: DataSnapshot) => {
-                this.pepDisp!.innerHTML = '';
-                this.pepDisp!.appendChild(button);
-                this.pepDisp!.appendChild(seeProfileButton);
-                this.pepDisp!.appendChild(logoutButton);
+        if (!jobSnapshot.exists()) {
+            console.log("Job not found");
+            return;
+        }
 
+        const jobData = jobSnapshot.val();
+        const applicationType = jobData.applicationType;
+        const applicantsRef = ref(database, `jobs/${this.jobId}/applicants`);
+        this.accDisp!.innerHTML = ''; // Clear previous entries
+
+        onValue(applicantsRef, (snapshot: DataSnapshot) => {
+            if (snapshot.exists()) {
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
-                    const refKey = childSnapshot.key;
-                    const userData = childSnapshot.val();
-                    const fullName = userData?.fullName ?? "Not set yet";
-                    const major = userData?.major ?? "Not set yet";
-                    const userDiv = document.createElement('div');
-                    userDiv.classList.add('user-entry');
-                    userDiv.style.marginBottom = '10px';
-                    let fullMajor = major != "Not set yet" ? this.mapMajors(major) : "Not set yet";
+                    const applicantData = childSnapshot.val();
+                    const uid = childSnapshot.key;
 
-                    userDiv.innerHTML = `
-                        <strong>Name:</strong> ${fullName} <br>
-                        <strong>Major:</strong> ${fullMajor}
-                    `;
-                    //the following is for pfp
-                    const squareDiv = document.createElement('div');
-                    const storage = getStorage();
-                    const profilePicRef = storageRef(storage, `profile-pictures/${refKey}`);
-                    if (profilePicRef) {
+                    if (applicantData.accepted) {
+                        // Retrieve applicant's profile details
+                        const applicantRef = ref(database, `users/${uid}`);
+                        get(applicantRef).then((applicantSnapshot: DataSnapshot) => {
+                            const applicantInfo = applicantSnapshot.val();
+                            const name = applicantInfo?.fullName || "Name Not Available";
+                            const email = applicantInfo?.email || "Email Not Available";
 
-                        getDownloadURL(profilePicRef)
-                            .then((downloadURL: string) => {
+                            // Create a container for each applicant's details
+                            const applicantDiv = document.createElement('div');
+                            applicantDiv.classList.add('entry');
 
-                                squareDiv.classList.add('grey-square');
+                            // Profile picture setup
+                            const storage = getStorage();
+                            const profilePicRef = storageRef(storage, `profile-pictures/${uid}`);
+                            if (profilePicRef) {
+                                getDownloadURL(profilePicRef)
+                                    .then((profilePicURL: string) => {
+                                        const applicantContainer = document.createElement('div');
+                                        applicantContainer.style.display = 'flex';
+                                        applicantContainer.style.alignItems = 'center';
+                                        applicantContainer.style.marginBottom = '10px';
 
-                                // Ensure pepDisp exists before prepending
-                                if (userDiv) {
-                                    userDiv.prepend(squareDiv);
+                                        const profilePicImg = document.createElement('img');
+                                        profilePicImg.src = profilePicURL;
+                                        profilePicImg.alt = `${name}'s Profile Picture`;
+                                        profilePicImg.style.width = '50px';
+                                        profilePicImg.style.height = '50px';
+                                        profilePicImg.style.borderRadius = '50%';
+                                        profilePicImg.style.marginRight = '15px';
 
-                                    const profileImage = document.createElement('img');
-                                    profileImage.id = 'profileImage';
-                                    profileImage.src = downloadURL; // Set the profile image source to the download URL
-                                    profileImage.alt = 'Profile Picture';
-                                    profileImage.style.width = '100%'; // Adjust as necessary
-                                    profileImage.style.height = '100%'; // Adjust as necessary
-                                    profileImage.style.objectFit = 'cover'; // Ensure the image fits nicely
+                                        const applicantInfoDiv = document.createElement('div');
+                                        applicantInfoDiv.innerHTML = `
+                                        <strong>Name:</strong> ${name} <br>
+                                        <strong>Email:</strong> ${email} <br>`;
 
-                                    squareDiv.appendChild(profileImage);
-                                }
-                            })
-                            .catch((error: any) => {
-                                console.error("Error fetching profile picture:", error);
+                                        applicantContainer.appendChild(profilePicImg);
+                                        applicantContainer.appendChild(applicantInfoDiv);
+                                        applicantDiv.appendChild(applicantContainer);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No profile picture found for applicant UID: ${uid}`);
+
+                                    });
+                            }
+                            else {
+                                applicantDiv.innerHTML = `
+                                    <strong>Name:</strong> ${name}<br>
+                                    <strong>Email:</strong> ${email}<br>
+                                `;
+                            }
+
+                            // Iframe to view documents
+                            const documentViewer = document.createElement('iframe');
+                            documentViewer.style.display = 'none';
+                            documentViewer.style.width = '100%';
+                            documentViewer.style.height = '750px';
+                            documentViewer.style.border = '1px solid #ccc';
+
+                            const closeBtn = document.createElement('button');
+                            closeBtn.textContent = "Close Viewer";
+                            closeBtn.style.display = 'none';
+                            closeBtn.style.marginTop = '10px';
+                            closeBtn.addEventListener('click', () => {
+                                documentViewer.style.display = 'none';
+                                closeBtn.style.display = 'none';
                             });
+
+                            applicantDiv.appendChild(documentViewer);
+                            applicantDiv.appendChild(closeBtn);
+
+                            // View Resume and Cover Letter setup
+                            if (applicationType.includes("res")) {
+                                const resumeRef = storageRef(storage, `resume/${uid}`);
+                                getDownloadURL(resumeRef)
+                                    .then((resumeURL: string) => {
+                                        const viewResumeBtn = document.createElement('button');
+                                        viewResumeBtn.textContent = "View Resume";
+                                        viewResumeBtn.addEventListener('click', () => {
+                                            documentViewer.src = resumeURL;
+                                            documentViewer.style.display = 'block';
+                                            closeBtn.style.display = 'block';
+                                        });
+                                        applicantDiv.appendChild(viewResumeBtn);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No resume found for applicant UID: ${uid}`);
+                                    });
+                            }
+
+                            if (applicationType.includes("cv")) {
+                                const cvRef = storageRef(storage, `coverLetter/${uid}`);
+                                getDownloadURL(cvRef)
+                                    .then((cvURL: string) => {
+                                        const viewCVBtn = document.createElement('button');
+                                        viewCVBtn.textContent = "View Cover Letter";
+                                        viewCVBtn.addEventListener('click', () => {
+                                            documentViewer.src = cvURL;
+                                            documentViewer.style.display = 'block';
+                                            closeBtn.style.display = 'block';
+                                        });
+                                        applicantDiv.appendChild(viewCVBtn);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No cover letter found for applicant UID: ${uid}`);
+                                    });
+                            }
+
+                            // Append applicant info to display
+                            this.accDisp!.appendChild(applicantDiv);
+                        }).catch((error: any) => {
+                            console.error(`Error fetching applicant details for UID: ${uid}`, error);
+                        });
                     }
-                    const profileImage = document.createElement('img');
-                    profileImage.id = 'profileImage';
-                    profileImage.src = '';
-                    squareDiv.appendChild(profileImage);
-
-                    userDiv.classList.add('entry');
-                    userDiv.style.marginBottom = '10px';
-                    userDiv.addEventListener('click', () => {
-                        window.location.href = "viewUser.html?id=" + refKey;
-
-                    });
-
-                    this.pepDisp!.appendChild(userDiv);
                 });
-            });
+            } else {
+                console.log("No applicants found for this job.");
+            }
+        });
+    }
+    async displayNew() {
+        const jobRef = ref(database, `jobs/${this.jobId}`);
+        const jobSnapshot = await get(jobRef);
+
+        if (!jobSnapshot.exists()) {
+            console.log("Job not found");
+            return;
         }
+
+        const jobData = jobSnapshot.val();
+        const applicationType = jobData.applicationType;
+        const applicantsRef = ref(database, `jobs/${this.jobId}/applicants`);
+        this.newDisp!.innerHTML = ''; // Clear previous entries
+
+        onValue(applicantsRef, (snapshot: DataSnapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot: DataSnapshot) => {
+                    const applicantData = childSnapshot.val();
+                    const uid = childSnapshot.key;
+
+                    if (!applicantData.accepted && !applicantData.rejected) {
+                        // Retrieve applicant's profile details
+                        const applicantRef = ref(database, `users/${uid}`);
+                        get(applicantRef).then((applicantSnapshot: DataSnapshot) => {
+                            const applicantInfo = applicantSnapshot.val();
+                            const name = applicantInfo?.fullName || "Name Not Available";
+                            const email = applicantInfo?.email || "Email Not Available";
+
+                            // Create a container for each applicant's details
+                            const applicantDiv = document.createElement('div');
+                            applicantDiv.classList.add('entry');
+
+                            // Profile picture setup
+                            const storage = getStorage();
+                            const profilePicRef = storageRef(storage, `profile-pictures/${uid}`);
+
+                            getDownloadURL(profilePicRef)
+                                .then((profilePicURL: string) => {
+                                    const applicantContainer = document.createElement('div');
+                                    applicantContainer.style.display = 'flex';
+                                    applicantContainer.style.alignItems = 'center';
+                                    applicantContainer.style.marginBottom = '10px';
+
+                                    const profilePicImg = document.createElement('img');
+                                    profilePicImg.src = profilePicURL;
+                                    profilePicImg.alt = `${name}'s Profile Picture`;
+                                    profilePicImg.style.width = '50px';
+                                    profilePicImg.style.height = '50px';
+                                    profilePicImg.style.borderRadius = '50%';
+                                    profilePicImg.style.marginRight = '15px';
+
+                                    const applicantInfoDiv = document.createElement('div');
+                                    applicantInfoDiv.innerHTML = `
+                                        <strong>Name:</strong> ${name} <br>
+                                        <strong>Email:</strong> ${email} <br>`;
+
+                                    applicantContainer.appendChild(profilePicImg);
+                                    applicantContainer.appendChild(applicantInfoDiv);
+                                    applicantDiv.appendChild(applicantContainer);
+                                })
+                                .catch(() => {
+                                    console.log(`No profile picture found for applicant UID: ${uid}`);
+                                    applicantDiv.innerHTML = `
+                                        <strong>Name:</strong> ${name}<br>
+                                        <strong>Email:</strong> ${email}<br>
+                                    `;
+                                });
+
+
+
+                            // View Resume and Cover Letter setup
+                            if (applicationType.includes("res")) {
+                                // Iframe to view documents
+                                const documentViewer = document.createElement('iframe');
+                                documentViewer.style.display = 'none';
+                                documentViewer.style.width = '100%';
+                                documentViewer.style.height = '750px';
+                                documentViewer.style.border = '1px solid #ccc';
+
+                                const closeBtn = document.createElement('button');
+                                closeBtn.textContent = "Close Viewer";
+                                closeBtn.style.display = 'none';
+                                closeBtn.style.marginTop = '10px';
+                                closeBtn.addEventListener('click', () => {
+                                    documentViewer.style.display = 'none';
+                                    closeBtn.style.display = 'none';
+                                });
+
+                                applicantDiv.appendChild(documentViewer);
+                                applicantDiv.appendChild(closeBtn);
+                                const resumeRef = storageRef(storage, `resume/${uid}`);
+                                getDownloadURL(resumeRef)
+                                    .then((resumeURL: string) => {
+                                        const viewResumeBtn = document.createElement('button');
+                                        viewResumeBtn.textContent = "View Resume";
+                                        viewResumeBtn.addEventListener('click', () => {
+                                            documentViewer.src = resumeURL; // Directly using resumeURL
+                                            documentViewer.style.display = 'block';
+                                            closeBtn.style.display = 'block';
+                                        });
+                                        applicantDiv.appendChild(viewResumeBtn);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No resume found for applicant UID: ${uid}`);
+                                    });
+                            }
+
+                            if (applicationType.includes("cv")) {
+                                // Iframe to view documents
+                                const documentViewer = document.createElement('iframe');
+                                documentViewer.style.display = 'none';
+                                documentViewer.style.width = '100%';
+                                documentViewer.style.height = '750px';
+                                documentViewer.style.border = '1px solid #ccc';
+
+                                const closeBtn = document.createElement('button');
+                                closeBtn.textContent = "Close Viewer";
+                                closeBtn.style.display = 'none';
+                                closeBtn.style.marginTop = '10px';
+                                closeBtn.addEventListener('click', () => {
+                                    documentViewer.style.display = 'none';
+                                    closeBtn.style.display = 'none';
+                                });
+
+                                applicantDiv.appendChild(documentViewer);
+                                applicantDiv.appendChild(closeBtn);
+                                const cvRef = storageRef(storage, `coverLetter/${uid}`);
+                                getDownloadURL(cvRef)
+                                    .then((cvURL: string) => {
+                                        const viewCVBtn = document.createElement('button');
+                                        viewCVBtn.textContent = "View Cover Letter";
+                                        viewCVBtn.addEventListener('click', () => {
+                                            documentViewer.src = cvURL; // Directly using cvURL
+                                            documentViewer.style.display = 'block';
+                                            closeBtn.style.display = 'block';
+                                        });
+                                        applicantDiv.appendChild(viewCVBtn);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No cover letter found for applicant UID: ${uid}`);
+                                    });
+                            }
+
+                            // Accept and Reject buttons
+                            const acceptBtn = document.createElement('button');
+                            acceptBtn.textContent = "Accept";
+                            acceptBtn.style.backgroundColor = 'green';
+                            acceptBtn.style.color = 'white';
+                            acceptBtn.style.marginRight = '10px';
+                     
+                            const rejectBtn = document.createElement('button');
+                            rejectBtn.textContent = "Reject";
+                            rejectBtn.style.backgroundColor = 'red';
+                            rejectBtn.style.color = 'white';
+
+                            applicantDiv.appendChild(acceptBtn);
+                            applicantDiv.appendChild(rejectBtn);
+                            rejectBtn.addEventListener('click', () => {
+                                const applicantStatusRef = ref(database, `jobs/${this.jobId}/applicants/${uid}`);
+                                update(applicantStatusRef, { accepted: false, rejected: true }).then(() => {
+                                    console.log(`Applicant ${uid} rejected.`);
+                                    acceptBtn.style.display = 'none';
+                                    rejectBtn.style.display = 'none';
+                                });
+                            });
+                            acceptBtn.addEventListener('click', () => {
+                                const applicantStatusRef = ref(database, `jobs/${this.jobId}/applicants/${uid}`);
+                                update(applicantStatusRef, { accepted: true, rejected: false }).then(() => {
+                                    console.log(`Applicant ${uid} accepted.`);
+                                    acceptBtn.style.display = 'none';
+                                    rejectBtn.style.display = 'none';
+                                });
+                            });
+
+
+
+                            // Append applicant info to display
+                            this.newDisp!.appendChild(applicantDiv);
+                        }).catch((error: any) => {
+                            console.error(`Error fetching applicant details for UID: ${uid}`, error);
+                        });
+                    }
+                });
+            } else {
+                console.log("No applicants found for this job.");
+            }
+        });
     }
 
-    displayJobsData() {
-        const positionsRef = ref(database, 'jobs');
-        if (this.posDisp) {
-            const button = document.createElement("button");
-            button.textContent = "Create Job";
-            button.addEventListener("click", () => {
-                window.location.href = "createJob.html";
-            });
-            const vButton = document.createElement("button");
-            vButton.textContent = "View Posts";
-            vButton.addEventListener("click",() =>{
-                window.location.href = "viewPosts.html";
-            });
+    async displayRej() {
+        const jobRef = ref(database, `jobs/${this.jobId}`);
+        const jobSnapshot = await get(jobRef);
 
-            //this.posDisp!.appendChild(button);
-            onValue(positionsRef, (snapshot: DataSnapshot) => {
-                this.posDisp!.innerHTML = '';
-                this.posDisp!.appendChild(button);
-                this.posDisp!.appendChild(vButton);
-                snapshot.forEach((levelSnapshot: DataSnapshot) => {
-                    const Refkey = levelSnapshot.key;
-                    const positionData = levelSnapshot.val();
-                    const { title, hourlyRateMin, hourlyRateMax, majors } = positionData;
-                    const fullMajors = this.mapMajors(majors);
-                    const positionDiv = document.createElement('div');
-                    positionDiv.classList.add('entry');
-                    positionDiv.style.marginBottom = '10px';
-                    positionDiv.innerHTML = `
-                        <strong>Title:</strong> ${title || "No Title"} <br>
-                        <strong>Hourly Rate Min:</strong> $${hourlyRateMin} <br>
-                        <strong>Hourly Rate Max:</strong> $${hourlyRateMax} <br>
-                        <strong>Majors:</strong> ${fullMajors.join(', ') || "No Majors"}
-                    `;
-                    positionDiv.addEventListener('click', () => {
-                        window.location.href = "viewJob.html?id=" + Refkey;
-
-                    });
-                    // the following is for pfp
-                    const squareDiv = document.createElement('div');
-                    const storage = getStorage();
-                    const profilePicRef = storageRef(storage, `jobLogos/${Refkey}`);
-                    if (profilePicRef) {
-
-                        getDownloadURL(profilePicRef)
-                            .then((downloadURL: string) => {
-
-                                squareDiv.classList.add('grey-square');
-
-                                // Ensure pepDisp exists before prepending
-                                if (positionDiv) {
-                                    positionDiv.prepend(squareDiv);
-
-                                    const profileImage = document.createElement('img');
-                                    profileImage.id = 'profileImage';
-                                    profileImage.src = downloadURL; // Set the profile image source to the download URL
-                                    profileImage.alt = 'Profile Picture';
-                                    profileImage.style.width = '100%'; // Adjust as necessary
-                                    profileImage.style.height = '100%'; // Adjust as necessary
-                                    profileImage.style.objectFit = 'cover'; // Ensure the image fits nicely
-
-                                    squareDiv.appendChild(profileImage);
-                                }
-                            })
-                            .catch((error: any) => {
-                                console.error("Error fetching profile picture:", error);
-                            });
-                    }
-                    this.posDisp!.appendChild(positionDiv);
-                });
-            });
-
+        if (!jobSnapshot.exists()) {
+            console.log("Job not found");
+            return;
         }
+
+        const jobData = jobSnapshot.val();
+        const applicationType = jobData.applicationType;
+        const applicantsRef = ref(database, `jobs/${this.jobId}/applicants`);
+        this.rejDisp!.innerHTML = ''; // Clear previous entries
+
+        onValue(applicantsRef, (snapshot: DataSnapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot: DataSnapshot) => {
+                    const applicantData = childSnapshot.val();
+                    const uid = childSnapshot.key;
+
+                    if (applicantData.rejepted) {
+                        // Retrieve applicant's profile details
+                        const applicantRef = ref(database, `users/${uid}`);
+                        get(applicantRef).then((applicantSnapshot: DataSnapshot) => {
+                            const applicantInfo = applicantSnapshot.val();
+                            const name = applicantInfo?.fullName || "Name Not Available";
+                            const email = applicantInfo?.email || "Email Not Available";
+
+                            // Create a container for each applicant's details
+                            const applicantDiv = document.createElement('div');
+                            applicantDiv.classList.add('entry');
+
+                            // Profile picture setup
+                            const storage = getStorage();
+                            const profilePicRef = storageRef(storage, `profile-pictures/${uid}`);
+                            if (profilePicRef) {
+                                getDownloadURL(profilePicRef)
+                                    .then((profilePicURL: string) => {
+                                        const applicantContainer = document.createElement('div');
+                                        applicantContainer.style.display = 'flex';
+                                        applicantContainer.style.alignItems = 'center';
+                                        applicantContainer.style.marginBottom = '10px';
+
+                                        const profilePicImg = document.createElement('img');
+                                        profilePicImg.src = profilePicURL;
+                                        profilePicImg.alt = `${name}'s Profile Picture`;
+                                        profilePicImg.style.width = '50px';
+                                        profilePicImg.style.height = '50px';
+                                        profilePicImg.style.borderRadius = '50%';
+                                        profilePicImg.style.marginRight = '15px';
+
+                                        const applicantInfoDiv = document.createElement('div');
+                                        applicantInfoDiv.innerHTML = `
+                                        <strong>Name:</strong> ${name} <br>
+                                        <strong>Email:</strong> ${email} <br>`;
+
+                                        applicantContainer.appendChild(profilePicImg);
+                                        applicantContainer.appendChild(applicantInfoDiv);
+                                        applicantDiv.appendChild(applicantContainer);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No profile picture found for applicant UID: ${uid}`);
+
+                                    });
+                            }
+                            else {
+                                applicantDiv.innerHTML = `
+                                    <strong>Name:</strong> ${name}<br>
+                                    <strong>Email:</strong> ${email}<br>
+                                `;
+                            }
+
+                            // Iframe to view documents
+                            const documentViewer = document.createElement('iframe');
+                            documentViewer.style.display = 'none';
+                            documentViewer.style.width = '100%';
+                            documentViewer.style.height = '750px';
+                            documentViewer.style.border = '1px solid #ccc';
+
+                            const closeBtn = document.createElement('button');
+                            closeBtn.textContent = "Close Viewer";
+                            closeBtn.style.display = 'none';
+                            closeBtn.style.marginTop = '10px';
+                            closeBtn.addEventListener('click', () => {
+                                documentViewer.style.display = 'none';
+                                closeBtn.style.display = 'none';
+                            });
+
+                            applicantDiv.appendChild(documentViewer);
+                            applicantDiv.appendChild(closeBtn);
+
+                            // View Resume and Cover Letter setup
+                            if (applicationType.includes("res")) {
+                                const resumeRef = storageRef(storage, `resume/${uid}`);
+                                getDownloadURL(resumeRef)
+                                    .then((resumeURL: string) => {
+                                        const viewResumeBtn = document.createElement('button');
+                                        viewResumeBtn.textContent = "View Resume";
+                                        viewResumeBtn.addEventListener('click', () => {
+                                            documentViewer.src = resumeURL;
+                                            documentViewer.style.display = 'block';
+                                            closeBtn.style.display = 'block';
+                                        });
+                                        applicantDiv.appendChild(viewResumeBtn);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No resume found for applicant UID: ${uid}`);
+                                    });
+                            }
+
+                            if (applicationType.includes("cv")) {
+                                const cvRef = storageRef(storage, `coverLetter/${uid}`);
+                                getDownloadURL(cvRef)
+                                    .then((cvURL: string) => {
+                                        const viewCVBtn = document.createElement('button');
+                                        viewCVBtn.textContent = "View Cover Letter";
+                                        viewCVBtn.addEventListener('click', () => {
+                                            documentViewer.src = cvURL;
+                                            documentViewer.style.display = 'block';
+                                            closeBtn.style.display = 'block';
+                                        });
+                                        applicantDiv.appendChild(viewCVBtn);
+                                    })
+                                    .catch(() => {
+                                        console.log(`No cover letter found for applicant UID: ${uid}`);
+                                    });
+                            }
+
+                            // Append applicant info to display
+                            this.rejDisp!.appendChild(applicantDiv);
+                        }).catch((error: any) => {
+                            console.error(`Error fetching applicant details for UID: ${uid}`, error);
+                        });
+                    }
+                });
+            } else {
+                console.log("No applicants found for this job.");
+            }
+        });
     }
+
+
+
+    /*
+        displayJobsData() {
+            const positionsRef = ref(database, 'jobs');
+            if (this.rejDisp) {
+                const button = document.createElement("button");
+                button.textContent = "Create Job";
+                button.addEventListener("click", () => {
+                    window.location.href = "createJob.html";
+                });
+                const vButton = document.createElement("button");
+                vButton.textContent = "View Posts";
+                vButton.addEventListener("click", () => {
+                    window.location.href = "viewPosts.html";
+                });
+    
+                //this.rejDisp!.appendChild(button);
+                onValue(positionsRef, (snapshot: DataSnapshot) => {
+                    this.rejDisp!.innerHTML = '';
+                    this.rejDisp!.appendChild(button);
+                    this.rejDisp!.appendChild(vButton);
+                    snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                        const Refkey = levelSnapshot.key;
+                        const positionData = levelSnapshot.val();
+                        const { title, hourlyRateMin, hourlyRateMax, majors } = positionData;
+                        const fullMajors = this.mapMajors(majors);
+                        const positionDiv = document.createElement('div');
+                        positionDiv.classList.add('entry');
+                        positionDiv.style.marginBottom = '10px';
+                        positionDiv.innerHTML = `
+                            <strong>Title:</strong> ${title || "No Title"} <br>
+                            <strong>Hourly Rate Min:</strong> $${hourlyRateMin} <br>
+                            <strong>Hourly Rate Max:</strong> $${hourlyRateMax} <br>
+                            <strong>Majors:</strong> ${fullMajors.join(', ') || "No Majors"}
+                        `;
+                        positionDiv.addEventListener('click', () => {
+                            window.location.href = "viewJob.html?id=" + Refkey;
+    
+                        });
+                        // the following is for pfp
+                        const squareDiv = document.createElement('div');
+                        const storage = getStorage();
+                        const profilePicRef = storageRef(storage, `jobLogos/${Refkey}`);
+                        if (profilePicRef) {
+    
+                            getDownloadURL(profilePicRef)
+                                .then((downloadURL: string) => {
+    
+                                    squareDiv.classList.add('grey-square');
+    
+                                    // Ensure accDisp exists before prepending
+                                    if (positionDiv) {
+                                        positionDiv.prepend(squareDiv);
+    
+                                        const profileImage = document.createElement('img');
+                                        profileImage.id = 'profileImage';
+                                        profileImage.src = downloadURL; // Set the profile image source to the download URL
+                                        profileImage.alt = 'Profile Picture';
+                                        profileImage.style.width = '100%'; // Adjust as necessary
+                                        profileImage.style.height = '100%'; // Adjust as necessary
+                                        profileImage.style.objectFit = 'cover'; // Ensure the image fits nicely
+    
+                                        squareDiv.appendChild(profileImage);
+                                    }
+                                })
+                                .catch((error: any) => {
+                                    console.error("Error fetching profile picture:", error);
+                                });
+                        }
+                        this.rejDisp!.appendChild(positionDiv);
+                    });
+                });
+    
+            }
+        }*/
 
     mapMajors(majors: string[]): string[] {
         const fullMajors: string[] = [];
@@ -360,9 +742,9 @@ class Homepage {
 
 window.onload = () => {
     const homepage = new Homepage();
-    const pepRadioButton = document.getElementById('pep') as HTMLInputElement;
-    if (pepRadioButton.checked) {
-        homepage.displayUsersData();
+    const accRadioButton = document.getElementById('acc') as HTMLInputElement;
+    if (accRadioButton.checked) {
+        homepage.displayAcc();
     }
 };
 const homeButton = document.getElementById("home") as HTMLInputElement;

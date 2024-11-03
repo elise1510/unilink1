@@ -215,7 +215,7 @@ class chatViewer {
                                 }
                             }
 
-                            const jobPreview = jobData?.applicants ? jobData.applicants.entrie : "No applicants";
+                            
                             const refKey = childSnapshot.key;
 
                             const requestDiv = document.createElement('div');
@@ -231,7 +231,7 @@ class chatViewer {
 
 
                             requestDiv.classList.add('entry');
-                            //console.log(refKey);
+                            console.log(refKey);
                             requestDiv.addEventListener('click', () => {
 
                                 window.location.href = `viewApplicants.html?id=${refKey}`;

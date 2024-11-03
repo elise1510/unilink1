@@ -404,7 +404,7 @@ document.getElementById("uploadResBtn")?.addEventListener("click", async () => {
 
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = '.doc,.docx,.pdf'
+        fileInput.accept = '.pdf'
         fileInput.click();
 
         fileInput.onchange = async (e) => {
