@@ -180,7 +180,7 @@ class Homepage {
         const usersRef = ref(database, 'users');
         if (this.pepDisp) {
             const button = document.createElement("button");
-            button.textContent = "See Chat Requests";
+            /*button.textContent = "See Chat Requests";
             button.addEventListener("click", async () => {
                 const userString = localStorage.getItem('userinfo');
                 if (userString) {
@@ -188,7 +188,7 @@ class Homepage {
                     const uid = user.uid;
                     window.location.href = "chat.html?id=" + uid;
                 }
-            });
+            });*/
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
                 this.pepDisp!.appendChild(button);
