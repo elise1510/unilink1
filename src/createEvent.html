@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Create Event</title>
+</head>
+<body>
+    <form id="create-event">
+        <label for="about">About this Event:</label>
+        <input type="text" id="about" name="about" required> 
+        <br>
+        
+        <label for="title">Event Title:</label>
+        <input type="text" id="title" name="title" required> 
+        <br>
+
+        <label for="date">Event Date:</label>
+        <input type="date" id="date" name="date" required>
+        <br>
+
+        <label for="time">Event Time:</label>
+        <input type="time" id="time" name="time" required>
+        <br>
+
+        <label for="location">Event Location:</label>
+        <input type="text" id="location" name="location" required>
+        <br>
+        
+        <label for="organizer">Organizer:</label>
+        <input type="text" id="organizer" name="organizer" required>
+        <br>
+
+        <label for="type">Event Type:</label>
+        <select id="type" name="type"> 
+            <option value="virtual">Virtual</option>
+            <option value="in-person">In-Person</option>
+            <option value="hybrid">Hybrid</option>
+        </select>
+        <br>
+        
+        <label for="targetAudience">Target Audience:</label>
+        <select id="targetAudience" name="targetAudience" multiple> 
+            <option value="students">Students</option>
+            <option value="faculty">Faculty</option>
+            <option value="staff">Staff</option>
+            <option value="public">Public</option>
+        </select>
+        <br>
+
+        <label for="maxAttendees">Maximum Number of Attendees:</label>
+        <input type="number" id="max-attendees" name="maxAttendees" min="1">
+        <br>
+        
+        <label for="expirationDate">RSVP Deadline:</label>
+        <input type="date" id="expirationDate" name="expirationDate">
+        <br>
+
+        <label for="logo">Upload Event Banner:</label>
+        <input type="file" id="logo" name="logo" accept="image/*">
+        <br>
+        
+        <button type="submit">Create Event</button>
+    </form>
+
+    <script type="module" src="../dist/createEvent.js"></script>
+</body>
+</html>
