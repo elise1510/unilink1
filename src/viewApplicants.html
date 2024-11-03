@@ -8,8 +8,8 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&display=swap');
 
-    .eve-disp,
-.pos-disp {
+    .acc-disp,
+.rej-disp {
     display: none;
 }
 
@@ -130,30 +130,31 @@
     }
   </style>
 </head>
+<button id = "home">Home</button>
 <div id="tab">
-    <label id="pep-label" class="container active"> People
+    <label id="acc-label" class="container active"> Accepted
         <input type="radio" name="tab" value="pep" id="pep" checked>
         <span class="checkmark"></span>
     </label>
-    <label id="eve-label" class="container"> Events
+    <label id="new-label" class="container"> New
         <input type="radio" name="tab" value="eve" id="eve">
         <span class="checkmark"></span>
     </label>
-    <label id="pos-label" class="container"> Positions
+    <label id="rej-label" class="container"> Rejected
         <input type="radio" name="tab" value="pos" id="pos">
         <span class="checkmark"></span>
     </label>
 </div>
-<div class="pep-disp" id = "pep-disp">
-   Loading People
+<div class="acc-disp" id = "pep-disp">
+    Accepted
 </div>
-<div class="eve-disp" id = "eve-disp">
-  Loading Events
+<div class="new-disp" id = "eve-disp">
+    New
 </div>
-<div class="pos-disp" id = "pos-disp">
-  Loading Positions
+<div class="rej-disp" id = "pos-disp">
+    Rejected
 </div>
-<script type="module" src="../dist/homepage.js"></script>
+<script type="module" src="../dist/viewApplicants.js"></script>
 
 </body>
 </html>

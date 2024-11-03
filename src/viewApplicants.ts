@@ -365,3 +365,7 @@ window.onload = () => {
         homepage.displayUsersData();
     }
 };
+const homeButton = document.getElementById("home") as HTMLInputElement;
+homeButton.addEventListener('click', () => {
+    window.location.href = "homepage.html";
+});

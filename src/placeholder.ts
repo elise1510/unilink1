@@ -137,7 +137,7 @@ class Homepage {
                     this.eveDisp.style.display = 'none';
                     this.posDisp.classList.remove('active');
                     this.posDisp.style.display = 'none';
-                    this.displayUsersData();
+                    this.displayNew();
                 } else if (inputRadio.value === 'eve' && this.pepDisp && this.eveDisp && this.posDisp) {
                     this.pepDisp.classList.remove('active');
                     this.pepDisp.style.display = 'none';
@@ -178,36 +178,19 @@ class Homepage {
         }
     }
 
-    displayUsersData() {
+    displayNew() {
         const usersRef = ref(database, 'users');
         if (this.pepDisp) {
-            const button = document.createElement("button");
-            button.textContent = "See Chat Requests";
-            button.addEventListener("click", async () => {
-                const userString = localStorage.getItem('userinfo');
-                if (userString) {
-                    const user = JSON.parse(userString);
-                    const uid = user.uid;
-                    window.location.href = "chat.html?id=" + uid;
-                }
-            });
-            const seeProfileButton = document.createElement("button");
-            seeProfileButton.textContent = "See Profile";
-            seeProfileButton.addEventListener("click", () => {
-                window.location.href = "profile.html";
+            //TODO: change to resume
+            const home = document.createElement("button");
+            home.textContent = "Homepage";
+            home.addEventListener("click", () => {
+                window.location.href = "homepage.html";
             });
 
-            const logoutButton = document.createElement("button");
-            logoutButton.textContent = "Logout";
-            logoutButton.addEventListener("click", () => {
-                localStorage.clear();
-                window.location.href = "login.html";
-            });
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
-                this.pepDisp!.appendChild(button);
-                this.pepDisp!.appendChild(seeProfileButton);
-                this.pepDisp!.appendChild(logoutButton);
+                this.pepDisp!.appendChild(home);
 
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
                     const refKey = childSnapshot.key;
@@ -362,6 +345,6 @@ window.onload = () => {
     const homepage = new Homepage();
     const pepRadioButton = document.getElementById('pep') as HTMLInputElement;
     if (pepRadioButton.checked) {
-        homepage.displayUsersData();
+        homepage.displayNew();
     }
 };

@@ -46,7 +46,7 @@ class UserLogin {
             }));
 
 
-            window.location.href = 'profile.html';
+            window.location.href = 'homepage.html';
 
         } catch (error: any) {
             if (error.code === 'auth/user-not-found') {
