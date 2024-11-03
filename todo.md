@@ -1,26 +1,60 @@
 # Create Jobs - Elise
 ## CreateJobs.ts
-- [X] Push job to firebase -> IMP
-    - [X] collect attributes
-- [ ] Verify input -> collect attributes
+- [X] Push job to Firebase -> IMP
+    - [X] Collect attributes
+- [ ] Verify input -> Collect attributes
 - [ ] Logo
-- [ ] respondants
-- [x] College/ Major select filtering
-    - [ ] college/major multiselect fix
-- [x] Grade Level Multiselect
-- [ ] Return to hompage -> dependency Homepage
-- [ ] Link from Homepage -> dependency Homepage
+- [ ] Respondents
+- [X] College/Major select filtering
+    - [ ] College/Major multiselect fix
+- [X] Grade Level multiselect
+- [X] Return to homepage -> Dependency: Homepage
+- [X] Link from Homepage -> Dependency: Homepage
+    - [ ] Make sure it's staff only
+- [X] **New problem: no unique identifier**
+
+## Optional
+- [ ] Drafts/templates
+
+# Create Events - Ankita
+
 # General - Any
-- [ ] homepage HTML - high priority
-- [ ] all CSS - low priority
-- [ ] remove not needed imports
+- [X] Homepage HTML - High priority
+- [ ] All CSS - Low priority
+- [ ] Remove unnecessary imports
+
 # Reg - Elise 
-- [ ] go to hompage -> dependency Homepage
-- [ ] Remove Username
-- [ ] Send Email Verification
-- [ ] OPT - Remove Password (just email link)
+- [X] Go to homepage -> Dependency: Homepage
+- [ ] Remove username
+- [ ] Send email verification
+- [ ] OPT - Remove password (just email link)
+
 # Login - Elise
-- [ ] go to hompage -> dependency Homepage
-# UserProfile - Zobia 
-- [ ] UseProfile Creation
-- [ ] Add User Info
+- [X] Go to homepage -> Dependency: Homepage
+- [ ] Autologin
+- [ ] Encryption
+
+# UserProfile - Zobia + Elise
+- [X] Use profile creation
+- [X] Add user info
+- [ ] Change graduation year from text to select
+- [ ] Logo
+- [X] Link to homepage -> Homepage
+- [ ] Link from homepage -> Homepage
+- [ ] If staff, no major (important)
+- [ ] PFP and PFP Croping(important)
+- [ ] Submit resume (important)
+
+
+# Homepage - Elise
+## Click on User Profile
+
+# Search and Filter - Zobia
+
+# Students submit to jobs, RSVP to events - Z + E
+
+# Jobs sort applicants - Z + E
+
+# Optional
+- Messaging: Me
+- Alumni/approval system: Any
