@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, onValue, DataSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, onValue, DataSnapshot, get } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -111,8 +111,8 @@ class Homepage {
     private pepLabel: HTMLElement | null;
     private eveLabel: HTMLElement | null;
     private posLabel: HTMLElement | null;
-    private searchInput: HTMLInputElement | null;
-    private searchButton: HTMLButtonElement | null;
+    // private searchInput: HTMLInputElement | null;
+    //private searchButton: HTMLButtonElement | null;
 
     constructor() {
         this.pepDisp = document.querySelector('.pep-disp');
@@ -121,11 +121,11 @@ class Homepage {
         this.pepLabel = document.getElementById('pep-label');
         this.eveLabel = document.getElementById('eve-label');
         this.posLabel = document.getElementById('pos-label');
-        this.searchInput = document.getElementById('search-input') as HTMLInputElement;
-        this.searchButton = document.getElementById('search-button') as HTMLButtonElement;
+        //this.searchInput = document.getElementById('search-input') as HTMLInputElement;
+        // this.searchButton = document.getElementById('search-button') as HTMLButtonElement;
 
         this.initTabListeners();
-        this.initSearchListener();
+        // this.initSearchListener();
         this.initLabelListeners();
     }
 
@@ -229,23 +229,34 @@ class Homepage {
             });
         }
     }
-
-
-    initSearchListener() {
-        if (this.searchButton) {
-            this.searchButton.addEventListener('click', () => {
-                const searchTerm = this.searchInput?.value.toLowerCase().trim(); // Added trim to remove whitespace
-                if (!searchTerm) {
-                    alert("Please enter a search term."); 
-                    return; // Exit if no search term is provided
-                }
-                this.filterJobsData(searchTerm);
-            });
-        }
-    }
+    /*
+    
+        initSearchListener() {
+            if (this.searchButton) {
+                this.searchButton.addEventListener('click', () => {
+                    const searchTerm = this.searchInput?.value.toLowerCase().trim(); // Added trim to remove whitespace
+                    if (!searchTerm) {
+                        alert("Please enter a search term."); 
+                        return; // Exit if no search term is provided
+                    }
+                    this.filterJobsData(searchTerm);
+                });
+            }
+        }*/
     displayUsersData() {
         const usersRef = ref(database, 'users');
         if (this.pepDisp) {
+            // Create the search input and button
+            const searchInput = document.createElement("input");
+            searchInput.type = "text";
+            searchInput.placeholder = "Search by name...";
+            searchInput.style.marginBottom = '10px';
+
+            const searchButton = document.createElement("button");
+            searchButton.textContent = "Search";
+            searchButton.style.marginLeft = '5px';
+
+            // Create the See Chat Requests button
             const button = document.createElement("button");
             button.textContent = "See Chat Requests";
             button.addEventListener("click", async () => {
@@ -256,9 +267,24 @@ class Homepage {
                     window.location.href = "chat.html?id=" + uid;
                 }
             });
+
+            // Append search input and button to the display
+            this.pepDisp.appendChild(searchInput);
+            this.pepDisp.appendChild(searchButton);
+            this.pepDisp.appendChild(button);
+
+            // Set up the event listener for the search button
+            searchButton.addEventListener("click", () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                this.searchUsers(searchTerm);
+            });
+
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
+                this.pepDisp!.appendChild(searchInput);
+                this.pepDisp!.appendChild(searchButton);
                 this.pepDisp!.appendChild(button);
+
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
                     const refKey = childSnapshot.key;
                     const userData = childSnapshot.val();
@@ -267,27 +293,90 @@ class Homepage {
                     const userDiv = document.createElement('div');
                     userDiv.classList.add('user-entry');
                     userDiv.style.marginBottom = '10px';
-                    let fullMajor = major != "Not set yet" ? this.mapMajors(major) : "Not set yet";
+                    let fullMajor = major !== "Not set yet" ? this.mapMajors(major) : "Not set yet";
 
                     userDiv.innerHTML = `
-                        <strong>Name:</strong> ${fullName} <br>
-                        <strong>Major:</strong> ${fullMajor}
-                    `;
-                    //the following is for pfp
-                    // const squareDiv = document.createElement('div');
-                    //squareDiv.classList.add('grey-square');
-                    //pepDisp.prepend(squareDiv);
+                            <strong>Name:</strong> ${fullName} <br>
+                            <strong>Major:</strong> ${fullMajor}
+                        `;
                     userDiv.classList.add('entry');
                     userDiv.style.marginBottom = '10px';
                     userDiv.addEventListener('click', () => {
                         window.location.href = "viewUser.html?id=" + refKey;
-
                     });
-                    
+
                     this.pepDisp!.appendChild(userDiv);
                 });
             });
         }
+    }
+
+
+    searchUsers(searchTerm: string) {
+        const usersRef = ref(database, 'users');
+        get(usersRef).then((snapshot: DataSnapshot) => {
+            this.pepDisp!.innerHTML = ''; // Clear previous entries
+            const searchInput = document.createElement("input");
+            searchInput.type = "text";
+            searchInput.placeholder = "Search by name...";
+            searchInput.style.marginBottom = '10px';
+
+            const searchButton = document.createElement("button");
+            searchButton.textContent = "Search";
+            searchButton.style.marginLeft = '5px';
+
+            // Create the See Chat Requests button
+            const button = document.createElement("button");
+            button.textContent = "See Chat Requests";
+            button.addEventListener("click", async () => {
+                const userString = localStorage.getItem('userinfo');
+                if (userString) {
+                    const user = JSON.parse(userString);
+                    const uid = user.uid;
+                    window.location.href = "chat.html?id=" + uid;
+                }
+            });
+
+            // Append search input and button to the display
+            this.pepDisp!.appendChild(searchInput);
+            this.pepDisp!.appendChild(searchButton);
+            this.pepDisp!.appendChild(button);
+
+            // Set up the event listener for the search button
+            searchButton.addEventListener("click", () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                this.searchUsers(searchTerm);
+            });
+
+            snapshot.forEach((childSnapshot: DataSnapshot) => {
+                const refKey = childSnapshot.key;
+                const userData = childSnapshot.val();
+                const fullName = userData?.fullName ?? "Not set yet";
+
+                // Check if the user's name matches the search term
+                if (fullName.toLowerCase().includes(searchTerm)) {
+                    const major = userData?.major ?? "Not set yet";
+                    const userDiv = document.createElement('div');
+                    userDiv.classList.add('user-entry');
+                    userDiv.style.marginBottom = '10px';
+                    let fullMajor = major !== "Not set yet" ? this.mapMajors(major) : "Not set yet";
+
+                    userDiv.innerHTML = `
+                            <strong>Name:</strong> ${fullName} <br>
+                            <strong>Major:</strong> ${fullMajor}
+                        `;
+                    userDiv.classList.add('entry');
+                    userDiv.style.marginBottom = '10px';
+                    userDiv.addEventListener('click', () => {
+                        window.location.href = "viewUser.html?id=" + refKey;
+                    });
+
+                    this.pepDisp!.appendChild(userDiv);
+                }
+            });
+        }).catch((error: any) => {
+            console.error("Error fetching users for search:", error);
+        });
     }
 
     displayJobsData() {
@@ -327,9 +416,10 @@ class Homepage {
                     this.posDisp!.appendChild(positionDiv);
                 });
             });
-            
+
         }
     }
+    
 
     mapMajors(majors: string[]): string[] {
         const fullMajors: string[] = [];
