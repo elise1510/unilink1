@@ -23,10 +23,10 @@ const firebaseConfig = {
     appId: "1:273956700882:web:c14a46a0074d9c8fed230b",
     measurementId: "G-NGJJN6W8ZC"
 };
-// Initialize Firebase
+//  Firebase Import Blockk
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const database = getDatabase(app); // Realtime Database initialization
+const database = getDatabase(app);
 class UserRegistration {
     constructor(username, email, password) {
         this.username = username;
@@ -49,11 +49,11 @@ class UserRegistration {
         messageDiv.style.color = color;
         messageDiv.innerText = message;
     }
-    // Save user role in Realtime Database
     saveUserRole(uid, role) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield set(ref(database, 'users/' + uid), {
+                    uid: uid,
                     username: this.username,
                     email: this.email,
                     role: role
@@ -77,7 +77,7 @@ class UserRegistration {
                 const userCredential = yield createUserWithEmailAndPassword(auth, this.email, this.password);
                 const user = userCredential.user;
                 yield updateProfile(user, { displayName: this.username });
-                yield this.saveUserRole(user.uid, role); // Save user role in Realtime Database
+                yield this.saveUserRole(user.uid, role);
                 this.updateMessage(`User registered successfully as a ${role}.`, 'green');
             }
             catch (error) {
@@ -112,7 +112,6 @@ class UserRegistration {
         return true;
     }
 }
-// Handling form submission
 const form = document.getElementById('registrationForm');
 form.addEventListener('submit', (event) => __awaiter(void 0, void 0, void 0, function* () {
     event.preventDefault();
