@@ -1,9 +1,11 @@
 // @ts-ignore
-import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, set, DataSnapshot, onValue, get, set } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+//@ts-ignore
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
-
+const storage = getStorage();
 // Class for Event creation
 class CreateEvent {
     about: string;
@@ -33,7 +35,7 @@ class CreateEvent {
     targetAudience: string[];
     maxAttendees: number;
     expirationDate: Date;
-    banner: string | null;
+    bannerFile: File | null;
 
     constructor() {
         this.about = (document.getElementById('about') as HTMLInputElement).value;
@@ -46,33 +48,110 @@ class CreateEvent {
         this.targetAudience = Array.from((document.getElementById('targetAudience') as HTMLSelectElement).selectedOptions).map(opt => opt.value);
         this.maxAttendees = parseInt((document.getElementById('max-attendees') as HTMLInputElement).value);
         this.expirationDate = new Date((document.getElementById('expirationDate') as HTMLInputElement).value);
-
-        const bannerFile = (document.getElementById('logo') as HTMLInputElement).files?.[0];
-        this.banner = bannerFile ? URL.createObjectURL(bannerFile) : null; // Mock for storing file path. You'll likely use Firebase Storage for real images.
+        this.bannerFile = (document.getElementById('logo') as HTMLInputElement).files?.[0] || null;
+        //const bannerFile = (document.getElementById('logo') as HTMLInputElement).files?.[0];
+        // this.banner = bannerFile ? URL.createObjectURL(bannerFile) : null; // Mock for storing file path. You'll likely use Firebase Storage for real images.
     }
 
     async saveEvent(uid: string) {
+        let now: Date = new Date();
+        const userRef = ref(database, 'users/' + uid);
+        const snapshot: DataSnapshot = await get(userRef);
+        let poster = "Name Not Set";
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            poster = userData?.name;
+        }
+        if (poster === undefined) {
+            poster = "Name Not Set";
+        }
+        let uniqueKey = uid + this.title;
+        let i = 0;
+        let check = await this.checkForMatch(uniqueKey);
+        let change = false;
+        console.log("check:", check);
+        while (check === false) {
+            i++;
+            console.log("match outside of loop");
+            check = await this.checkForMatch(uniqueKey + i);
+            change = true;
+        }
+        if (check === true && change === true) {
+            uniqueKey = uniqueKey + i;
+        }
+        let logoUrl = '';
+        if (this.bannerFile) {
+            const sref = storageRef(storage, 'eventBanners/' + uniqueKey);
+            await uploadBytesResumable(sref, this.bannerFile);
+            logoUrl = await getDownloadURL(sref);
+        }
         try {
-            await set(ref(database, 'events/' + uid), {
-                uid: uid,
-                about: this.about,
-                title: this.title,
-                date: this.date,
-                time: this.time,
-                location: this.location,
-                organizer: this.organizer,
-                type: this.type,
-                targetAudience: this.targetAudience,
-                maxAttendees: this.maxAttendees,
-                expirationDate: this.expirationDate,
-                banner: this.banner
-            });
+            if (this.bannerFile) {
+                await set(ref(database, 'events/' + uniqueKey), {
+                    uid: uid,
+                    about: this.about,
+                    title: this.title,
+                    date: this.date,
+                    time: this.time,
+                    location: this.location,
+                    organizer: this.organizer,
+                    type: this.type,
+                    targetAudience: this.targetAudience,
+                    maxAttendees: this.maxAttendees,
+                    expirationDate: this.expirationDate,
+                    banner: logoUrl,
+                    DatePosted: now,
+                    postedBy: poster
+                });
+            }
+            else {
+                await set(ref(database, 'events/' + uniqueKey), {
+                    uid: uid,
+                    about: this.about,
+                    title: this.title,
+                    date: this.date,
+                    time: this.time,
+                    location: this.location,
+                    organizer: this.organizer,
+                    type: this.type,
+                    targetAudience: this.targetAudience,
+                    maxAttendees: this.maxAttendees,
+                    expirationDate: this.expirationDate,
+                    banner: logoUrl,
+                    DatePosted: now,
+                    postedBy: poster
+                });
+            }
             console.log('Event saved to Realtime Database successfully.');
         } catch (error) {
             console.error('Error saving event:', error);
         }
     }
+
+
+    async checkForMatch(uniqueKey: string): Promise<boolean> {
+        const eventRef = ref(database, 'events');
+        const snapshot = await get(eventRef);
+
+        let match = true;
+
+        snapshot.forEach((levelSnapshot: DataSnapshot) => {
+            const compKey = levelSnapshot.key;
+            if (compKey === uniqueKey) {
+                match = false;
+            }
+        });
+
+        return match;
+    }
 }
+
+
+
+
+
+
+
 
 const form = document.getElementById('create-event') as HTMLFormElement;
 form.addEventListener('submit', async (event) => {
