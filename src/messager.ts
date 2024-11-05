@@ -91,18 +91,24 @@ class Messager {
                     // This is the current user's message (Gray on the right)
                     messageDiv.style.backgroundColor = '#D3D3D3'; // Light gray
                     messageDiv.style.color = '#000'; // Black text
-                    messageDiv.style.textAlign = 'right'; // Align text to the left
+                    messageDiv.style.textAlign = 'right';
                     messageDiv.style.marginRight = 'auto';
-                  // Push message to the right
+                    messageDiv.style.cssFloat = 'right';
+                    messageDiv.style.clear = 'both'; // Ensures each message is on its own line
+                    messageDiv.style.display = 'block';
                 } else {
                     // This is the other user's message (Blue on the left)
                     messageDiv.style.backgroundColor = '#ADD8E6'; // Light blue
                     messageDiv.style.color = '#000'; // Black text
-                       messageDiv.style.textAlign = 'right'; // Align text to the right
+                    messageDiv.style.textAlign = 'left';
                     messageDiv.style.marginLeft = 'auto';
+                    messageDiv.style.cssFloat = 'left';
+                    messageDiv.style.clear = 'both'; // Ensures each message is on its own line
+                    messageDiv.style.display = 'block';
                 }
     
                 messageDiv.style.padding = '10px';
+                messageDiv.style.margin = '5px';
                 messageDiv.style.margin = '5px';
                 messageDiv.style.borderRadius = '10px';
                 messageDiv.style.maxWidth = '60%'; // Limit the message width
