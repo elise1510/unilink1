@@ -200,8 +200,12 @@ class Homepage {
             const logoutButton = document.createElement("button");
             logoutButton.textContent = "Logout";
             logoutButton.addEventListener("click", () => {
-                localStorage.clear();
-                window.location.href = "login.html";
+                 localStorage.clear();
+                const userString = localStorage.getItem('userinfo');
+                if(!userString){
+                    window.location.href = 'login.html'
+                }
+                
             });
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
