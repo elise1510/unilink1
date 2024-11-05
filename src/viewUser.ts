@@ -193,6 +193,7 @@ class UserViewer {
         }
     }
     private displayUserData(userData: any) {
+        this.displayProfilePic();
         /*About*/
         this.setElementTextContent("name", userData?.fullName, "not set");
         /*Title*/
@@ -259,6 +260,30 @@ class UserViewer {
             });
         });
         return mappedMajor;
+    }
+    private async displayProfilePic() {
+        const jobRef = ref(database, 'profile-pictures/' + this.userId);
+
+        try {
+            const snapshot: DataSnapshot = await get(jobRef);
+
+            if (snapshot.exists()) {
+                const jobData = snapshot.val();
+                console.log(jobData);
+                //const logoUrl = jobData.logo;
+
+                const logoImage = document.getElementById('logo-image') as HTMLImageElement;
+                if (jobData) {
+                    logoImage.src = jobData;
+                } else {
+                    console.log('No logo URL found for this job.');
+                }
+            } else {
+                console.log('No job data found for the provided job ID.');
+            }
+        } catch (error) {
+            console.error('Error fetching job logo:', error);
+        }
     }
     
     private mapCollege(collegeValue: string): string {
