@@ -231,6 +231,16 @@ class Homepage {
             button.addEventListener("click", () => {
                 window.location.href = "createJob.html";
             });
+            const logoutButton = document.createElement("button");
+            logoutButton.textContent = "Logout";
+            logoutButton.addEventListener("click", () => {
+                 localStorage.clear();
+                const userString = localStorage.getItem('userinfo');
+                if(!userString){
+                    window.location.href = 'login.html'
+                }
+                
+            });
             //this.posDisp!.appendChild(button);
             onValue(positionsRef, (snapshot: DataSnapshot) => {
                 this.posDisp!.innerHTML = '';
