@@ -348,32 +348,32 @@ class Homepage {
                 window.location.href = "createEvent.html";
             });
             this.eveDisp!.appendChild(button);
-            /*
-            onValue(positionsRef, (snapshot: DataSnapshot) => {
-                this.posDisp!.innerHTML = '';
-                this.posDisp!.appendChild(button);
+            
+            onValue(eveRef, (snapshot: DataSnapshot) => {
+                this.eveDisp!.innerHTML = '';
+                this.eveDisp!.appendChild(button);
                 snapshot.forEach((levelSnapshot: DataSnapshot) => {
                     const Refkey = levelSnapshot.key;
                     const positionData = levelSnapshot.val();
-                    const { title, hourlyRateMin, hourlyRateMax, majors } = positionData;
-                    const fullMajors = this.mapMajors(majors);
-                    const positionDiv = document.createElement('div');
-                    positionDiv.classList.add('entry');
-                    positionDiv.style.marginBottom = '10px';
-                    positionDiv.innerHTML = `
+                    const { title, location, date, organizer } = positionData;
+                    const eventDiv = document.createElement('div');
+                    eventDiv.classList.add('entry');
+                    eventDiv.style.marginBottom = '10px';
+                    eventDiv.innerHTML = `
                         <strong>Title:</strong> ${title || "No Title"} <br>
-                        <strong>Hourly Rate Min:</strong> $${hourlyRateMin} <br>
-                        <strong>Hourly Rate Max:</strong> $${hourlyRateMax} <br>
-                        <strong>Majors:</strong> ${fullMajors.join(', ') || "No Majors"}
+                        <strong>Location:</strong> ${location} <br>
+                        <strong>Date:</strong> $${date} <br>
+                        <strong>Organizer:</strong> ${organizer}
                     `;
-                    positionDiv.addEventListener('click', () => {
-                        window.location.href = "viewJob.html?id=" + Refkey;
+                    eventDiv.addEventListener('click', () => {
+                        //TODO:ZOBIA
+                        window.location.href = "viewEvent.html?id=" + Refkey;
 
                     });
                     // the following is for pfp
                     const squareDiv = document.createElement('div');
                     const storage = getStorage();
-                    const profilePicRef = storageRef(storage, `jobLogos/${Refkey}`);
+                    const profilePicRef = storageRef(storage, `eventBanners/${Refkey}`);
                     if (profilePicRef) {
 
                         getDownloadURL(profilePicRef)
@@ -382,8 +382,8 @@ class Homepage {
                                 squareDiv.classList.add('grey-square');
 
                                 // Ensure pepDisp exists before prepending
-                                if (positionDiv) {
-                                    positionDiv.prepend(squareDiv);
+                                if (eventDiv) {
+                                    eventDiv.prepend(squareDiv);
 
                                     const profileImage = document.createElement('img');
                                     profileImage.id = 'profileImage';
@@ -400,10 +400,10 @@ class Homepage {
                                 console.error("Error fetching profile picture:", error);
                             });
                     }
-                    this.posDisp!.appendChild(positionDiv);
+                    this.eveDisp!.appendChild(eventDiv);
                 });
             });
-*/
+
         }
     }
 
