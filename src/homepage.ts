@@ -382,15 +382,123 @@ class Homepage {
     displayJobsData() {
         const positionsRef = ref(database, 'jobs');
         if (this.posDisp) {
+            this.posDisp.innerHTML = ''; // Clear previous content
+
+
+            const parentContainer = document.createElement('div');
+            parentContainer.style.display = 'flex';
+            parentContainer.style.alignItems = 'flex-start';
+            parentContainer.style.height = '100vh';
+            parentContainer.style.overflow = 'hidden';
+
+            // Filter containtainer styling that's functional in nature, pins it to the top left and doesn't let it scroll + shortens it a bit
+            const filtersContainer = document.createElement('div');
+            filtersContainer.style.width = '150px';
+            filtersContainer.style.position = 'sticky';
+            filtersContainer.style.top = '0';
+            filtersContainer.style.height = '100%';
+            filtersContainer.style.padding = '10px';
+            filtersContainer.style.boxSizing = 'border-box';
+            filtersContainer.style.backgroundColor = '#f4f4f4';
+            filtersContainer.style.borderRight = '1px solid #ccc';
+            filtersContainer.style.overflowY = 'auto';
+
+
+            const typeSelect = document.createElement('select');
+            typeSelect.id = 'type';
+            typeSelect.innerHTML = `
+                <option value="">Select Type</option>
+                <option value="remote">Remote</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="on-site">On-Site</option>
+            `;
+            filtersContainer.appendChild(typeSelect);
+            typeSelect.classList.add('filterSelect');
+
+            const experienceSelect = document.createElement('select');
+            experienceSelect.id = 'expirence';
+            experienceSelect.innerHTML = `
+                <option value="">Select Experience</option>
+                <option value="entry-level">Entry Level</option>
+                <option value="mid-level">Mid Level</option>
+                <option value="senior-level">Senior Level</option>
+            `;
+            filtersContainer.appendChild(experienceSelect);
+            experienceSelect.classList.add('filterSelect');
+
+            const timeSelect = document.createElement('select');
+            timeSelect.id = 'time';
+            timeSelect.innerHTML = `
+                <option value="">Select Time</option>
+                <option value="part-time">Part-Time</option>
+                <option value="full-time">Full-Time</option>
+            `;
+            filtersContainer.appendChild(timeSelect);
+            timeSelect.classList.add('filterSelect');
+
+            const workloadSelect = document.createElement('select');
+            workloadSelect.id = 'workload';
+            workloadSelect.innerHTML = `
+                <option value="">Select Workload</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="heavy">Heavy</option>
+            `;
+            filtersContainer.appendChild(workloadSelect);
+            workloadSelect.classList.add('filterSelect');
+
+            const gradeLevelSelect = document.createElement('select');
+            gradeLevelSelect.id = 'gradeLevels';
+            gradeLevelSelect.innerHTML = `
+                <option value="">Select Grade Level</option>
+                <option value="fresh">Freshmen</option>
+                <option value="soph">Sophmore</option>
+                <option value="jun">Junior</option>
+                <option value="sen">Senior</option>
+            `;
+            filtersContainer.appendChild(gradeLevelSelect);
+            gradeLevelSelect.classList.add('filterSelect');
+            // Select all the filter select elements
+
+
+
+            /*
+                    // Style the select elements
+                    [typeSelect, gradeLevelSelect, experienceSelect, timeSelect, workloadSelect].forEach(select => {
+                        select.style.display = 'block';
+                        select.style.marginBottom = '10px';
+                        select.style.width = '100%';
+                    });*/
+
+            // Append the filters container to the parent container
+            parentContainer.appendChild(filtersContainer);
+
+            // Create a container for job entries
+            const entriesContainer = document.createElement('div');
+            entriesContainer.style.flex = '1'; // Take remaining space
+            entriesContainer.style.height = '100%';
+            entriesContainer.style.overflowY = 'auto';
+            entriesContainer.style.padding = '10px';
+            entriesContainer.style.boxSizing = 'border-box';
+            entriesContainer.id = 'ec';
+
+            parentContainer.appendChild(entriesContainer);
+
+            // Append the parent container to the display
+            this.posDisp.appendChild(parentContainer);
+
+            // Create the "Create Job" button
             const button = document.createElement("button");
             button.textContent = "Create Job";
             button.addEventListener("click", () => {
                 window.location.href = "createJob.html";
             });
-            //this.posDisp!.appendChild(button);
+            entriesContainer.appendChild(button);
+
+            // Load and display job entries
             onValue(positionsRef, (snapshot: DataSnapshot) => {
-                this.posDisp!.innerHTML = '';
-                this.posDisp!.appendChild(button);
+                entriesContainer.innerHTML = ''; // Clear previous entries
+                entriesContainer.appendChild(button); // Add the button back
                 snapshot.forEach((levelSnapshot: DataSnapshot) => {
                     const Refkey = levelSnapshot.key;
                     const positionData = levelSnapshot.val();
@@ -398,6 +506,7 @@ class Homepage {
                     const fullMajors = this.mapMajors(majors);
                     const positionDiv = document.createElement('div');
                     positionDiv.classList.add('entry');
+                    positionDiv.setAttribute('job-key', Refkey!);
                     positionDiv.style.marginBottom = '10px';
                     positionDiv.innerHTML = `
                         <strong>Title:</strong> ${title || "No Title"} <br>
@@ -407,19 +516,71 @@ class Homepage {
                     `;
                     positionDiv.addEventListener('click', () => {
                         window.location.href = "viewJob.html?id=" + Refkey;
-
                     });
-                    // the following is for pfp
-                    //const squareDiv = document.createElement('div');
-                    //squareDiv.classList.add('grey-square');
-                    ///positionDiv.prepend(squareDiv);
-                    this.posDisp!.appendChild(positionDiv);
+                    entriesContainer.appendChild(positionDiv);
+                    const filterSelects = document.querySelectorAll('.filterSelect');
+       
+                    let currentFilters: { [key: string]: string } = {
+                        type: "",
+                        expirence: "",
+                        time: "",
+                        workload: "",
+                        gradeLevels: ""
+                    };
+                    filterSelects.forEach(select => {
+                        select.addEventListener('change', (event) => {
+                            const target = event.target as HTMLSelectElement | null;
+                    
+                            if (target) {
+                                const selectedValue = target.value;
+                                const selectId = target.id;
+                    
+                                // Update the current filter state
+                                currentFilters[selectId] = selectedValue.trim() === "" ? "" : selectedValue;
+                    
+                                // Update the entries based on all active filters
+                                this.updateEntries(currentFilters);
+                            }
+                        });
+                    });
                 });
             });
-
         }
     }
+    updateEntries(currentFilters: { [key: string]: string })  {
+        const posRef = ref(database, 'jobs');
+        const ec = document.getElementById('ec');
+        const entries = this.posDisp!.querySelectorAll('.entry');
     
+        onValue(posRef, (snapshot: DataSnapshot) => {
+            snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                const posData = levelSnapshot.val();
+                const refKey = levelSnapshot.key;
+    
+                // Check if the job entry matches all active filters
+                let shouldDisplay = true;
+                for (const [filterId, filterValue] of Object.entries(currentFilters)) {
+                    if (filterValue && posData[filterId] !== filterValue) {
+                        shouldDisplay = false;
+                        break;
+                    }
+                }
+    
+                const entry = Array.from(entries).find((entry) => entry.getAttribute('job-key') === refKey);
+                
+                if (entry) {
+                    const entryElement = entry as HTMLElement;
+    
+                    // Show the entry if it matches the filters, hide it otherwise
+                    if (shouldDisplay) {
+                        entryElement.style.display = 'block';
+                    } else {
+                        entryElement.style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
 
     mapMajors(majors: string[]): string[] {
         const fullMajors: string[] = [];
