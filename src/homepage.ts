@@ -1,13 +1,11 @@
-
 // @ts-ignore
 import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, onValue, DataSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, onValue, DataSnapshot, get } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
 //@ts-ignore
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
-
 // Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA3Eau1V4XxcHMrV02FxIuXprFpb2NR510",
@@ -114,6 +112,8 @@ class Homepage {
     private pepLabel: HTMLElement | null;
     private eveLabel: HTMLElement | null;
     private posLabel: HTMLElement | null;
+    // private searchInput: HTMLInputElement | null;
+    //private searchButton: HTMLButtonElement | null;
 
     constructor() {
         this.pepDisp = document.querySelector('.pep-disp');
@@ -122,8 +122,60 @@ class Homepage {
         this.pepLabel = document.getElementById('pep-label');
         this.eveLabel = document.getElementById('eve-label');
         this.posLabel = document.getElementById('pos-label');
+        //this.searchInput = document.getElementById('search-input') as HTMLInputElement;
+        // this.searchButton = document.getElementById('search-button') as HTMLButtonElement;
+
         this.initTabListeners();
+        // this.initSearchListener();
         this.initLabelListeners();
+    }
+
+    filterUsersData(searchTerm: string) {
+        const usersRef = ref(database, 'users');
+        onValue(usersRef, (snapshot: DataSnapshot) => {
+            this.pepDisp!.innerHTML = '';
+            snapshot.forEach((childSnapshot: DataSnapshot) => {
+                const userData = childSnapshot.val();
+                const fullName = userData?.fullName ?? "Not set yet";
+                const major = userData?.major ?? "Not set yet";
+                const userDiv = document.createElement('div');
+                userDiv.classList.add('user-entry');
+                userDiv.style.marginBottom = '10px';
+
+                if (fullName.toLowerCase().includes(searchTerm) || major.toLowerCase().includes(searchTerm)) {
+                    userDiv.innerHTML = `
+                        <strong>Name:</strong> ${fullName} <br>
+                        <strong>Major:</strong> ${this.mapMajors(major).join(', ') || "Not set yet"}
+                    `;
+                    this.pepDisp!.appendChild(userDiv);
+                }
+            });
+        });
+    }
+
+    filterJobsData(searchTerm: string) {
+        const positionsRef = ref(database, 'jobs');
+        onValue(positionsRef, (snapshot: DataSnapshot) => {
+            this.posDisp!.innerHTML = '';
+            snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                const positionData = levelSnapshot.val();
+                const title = positionData.title || "No Title";
+                const fullMajors = this.mapMajors(positionData.majors).join(', ');
+                const positionDiv = document.createElement('div');
+                positionDiv.classList.add('entry');
+                positionDiv.style.marginBottom = '10px';
+
+                if (title.toLowerCase().includes(searchTerm) || fullMajors.toLowerCase().includes(searchTerm)) {
+                    positionDiv.innerHTML = `
+                        <strong>Title:</strong> ${title} <br>
+                        <strong>Hourly Rate Min:</strong> $${positionData.hourlyRateMin} <br>
+                        <strong>Hourly Rate Max:</strong> $${positionData.hourlyRateMax} <br>
+                        <strong>Majors:</strong> ${fullMajors || "No Majors"}
+                    `;
+                    this.posDisp!.appendChild(positionDiv);
+                }
+            });
+        });
     }
 
     initTabListeners() {
@@ -178,10 +230,34 @@ class Homepage {
             });
         }
     }
-
+    /*
+    
+        initSearchListener() {
+            if (this.searchButton) {
+                this.searchButton.addEventListener('click', () => {
+                    const searchTerm = this.searchInput?.value.toLowerCase().trim(); // Added trim to remove whitespace
+                    if (!searchTerm) {
+                        alert("Please enter a search term."); 
+                        return; // Exit if no search term is provided
+                    }
+                    this.filterJobsData(searchTerm);
+                });
+            }
+        }*/
     displayUsersData() {
         const usersRef = ref(database, 'users');
         if (this.pepDisp) {
+            // Create the search input and button
+            const searchInput = document.createElement("input");
+            searchInput.type = "text";
+            searchInput.placeholder = "Search by name...";
+            searchInput.style.marginBottom = '10px';
+
+            const searchButton = document.createElement("button");
+            searchButton.textContent = "Search";
+            searchButton.style.marginLeft = '5px';
+
+            // Create the See Chat Requests button
             const button = document.createElement("button");
             button.textContent = "See Chat Requests";
             button.addEventListener("click", async () => {
@@ -208,11 +284,26 @@ class Homepage {
                 }
                 
             });
+
+            // Append search input and button to the display
+            this.pepDisp.appendChild(searchInput);
+            this.pepDisp.appendChild(searchButton);
+            this.pepDisp.appendChild(button);
+
+            // Set up the event listener for the search button
+            searchButton.addEventListener("click", () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                this.searchUsers(searchTerm);
+            });
+
             onValue(usersRef, (snapshot: DataSnapshot) => {
                 this.pepDisp!.innerHTML = '';
+                this.pepDisp!.appendChild(searchInput);
+                this.pepDisp!.appendChild(searchButton);
                 this.pepDisp!.appendChild(button);
                 this.pepDisp!.appendChild(seeProfileButton);
                 this.pepDisp!.appendChild(logoutButton);
+
 
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
                     const refKey = childSnapshot.key;
@@ -222,12 +313,12 @@ class Homepage {
                     const userDiv = document.createElement('div');
                     userDiv.classList.add('user-entry');
                     userDiv.style.marginBottom = '10px';
-                    let fullMajor = major != "Not set yet" ? this.mapMajors(major) : "Not set yet";
+                    let fullMajor = major !== "Not set yet" ? this.mapMajors(major) : "Not set yet";
 
                     userDiv.innerHTML = `
-                        <strong>Name:</strong> ${fullName} <br>
-                        <strong>Major:</strong> ${fullMajor}
-                    `;
+                            <strong>Name:</strong> ${fullName} <br>
+                            <strong>Major:</strong> ${fullMajor}
+                        `;
                     //the following is for pfp
                     const squareDiv = document.createElement('div');
                     const storage = getStorage();
@@ -262,12 +353,10 @@ class Homepage {
                     profileImage.id = 'profileImage';
                     profileImage.src = '';
                     squareDiv.appendChild(profileImage);
-
                     userDiv.classList.add('entry');
                     userDiv.style.marginBottom = '10px';
                     userDiv.addEventListener('click', () => {
                         window.location.href = "viewUser.html?id=" + refKey;
-
                     });
 
                     this.pepDisp!.appendChild(userDiv);
@@ -276,25 +365,203 @@ class Homepage {
         }
     }
 
+
+    searchUsers(searchTerm: string) {
+        const usersRef = ref(database, 'users');
+        get(usersRef).then((snapshot: DataSnapshot) => {
+            this.pepDisp!.innerHTML = ''; // Clear previous entries
+            const searchInput = document.createElement("input");
+            searchInput.type = "text";
+            searchInput.placeholder = "Search by name...";
+            searchInput.style.marginBottom = '10px';
+
+            const searchButton = document.createElement("button");
+            searchButton.textContent = "Search";
+            searchButton.style.marginLeft = '5px';
+
+            // Create the See Chat Requests button
+            const button = document.createElement("button");
+            button.textContent = "See Chat Requests";
+            button.addEventListener("click", async () => {
+                const userString = localStorage.getItem('userinfo');
+                if (userString) {
+                    const user = JSON.parse(userString);
+                    const uid = user.uid;
+                    window.location.href = "chat.html?id=" + uid;
+                }
+            });
+
+            // Append search input and button to the display
+            this.pepDisp!.appendChild(searchInput);
+            this.pepDisp!.appendChild(searchButton);
+            this.pepDisp!.appendChild(button);
+
+            // Set up the event listener for the search button
+            searchButton.addEventListener("click", () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                this.searchUsers(searchTerm);
+            });
+
+            snapshot.forEach((childSnapshot: DataSnapshot) => {
+                const refKey = childSnapshot.key;
+                const userData = childSnapshot.val();
+                const fullName = userData?.fullName ?? "Not set yet";
+
+                // Check if the user's name matches the search term
+                if (fullName.toLowerCase().includes(searchTerm)) {
+                    const major = userData?.major ?? "Not set yet";
+                    const userDiv = document.createElement('div');
+                    userDiv.classList.add('user-entry');
+                    userDiv.style.marginBottom = '10px';
+                    let fullMajor = major !== "Not set yet" ? this.mapMajors(major) : "Not set yet";
+
+                    userDiv.innerHTML = `
+                            <strong>Name:</strong> ${fullName} <br>
+                            <strong>Major:</strong> ${fullMajor}
+                        `;
+                    userDiv.classList.add('entry');
+                    userDiv.style.marginBottom = '10px';
+                    userDiv.addEventListener('click', () => {
+                        window.location.href = "viewUser.html?id=" + refKey;
+                    });
+
+                    this.pepDisp!.appendChild(userDiv);
+                }
+            });
+        }).catch((error: any) => {
+            console.error("Error fetching users for search:", error);
+        });
+    }
+
     displayJobsData() {
         const positionsRef = ref(database, 'jobs');
         if (this.posDisp) {
+            this.posDisp.innerHTML = ''; 
+
+
+            const parentContainer = document.createElement('div');
+            parentContainer.style.display = 'flex';
+            parentContainer.style.alignItems = 'flex-start';
+            parentContainer.style.height = '100vh';
+            parentContainer.style.overflow = 'hidden';
+
+            // Filter containtainer styling that's functional in nature, pins it to the top left and doesn't let it scroll + shortens it a bit
+            const filtersContainer = document.createElement('div');
+            filtersContainer.style.width = '150px';
+            filtersContainer.style.position = 'sticky';
+            filtersContainer.style.top = '0';
+            filtersContainer.style.height = '100%';
+            filtersContainer.style.padding = '10px';
+            filtersContainer.style.boxSizing = 'border-box';
+            filtersContainer.style.backgroundColor = '#f4f4f4';
+            filtersContainer.style.borderRight = '1px solid #ccc';
+            filtersContainer.style.overflowY = 'auto';
+
+
+            const typeSelect = document.createElement('select');
+            typeSelect.id = 'type';
+            typeSelect.innerHTML = `
+                <option value="">Select Type</option>
+                <option value="remote">Remote</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="on-site">On-Site</option>
+            `;
+            filtersContainer.appendChild(typeSelect);
+            typeSelect.classList.add('filterSelect');
+
+            const experienceSelect = document.createElement('select');
+            experienceSelect.id = 'expirence';
+            experienceSelect.innerHTML = `
+                <option value="">Select Experience</option>
+                <option value="entry-level">Entry Level</option>
+                <option value="mid-level">Mid Level</option>
+                <option value="senior-level">Senior Level</option>
+            `;
+            filtersContainer.appendChild(experienceSelect);
+            experienceSelect.classList.add('filterSelect');
+
+            const timeSelect = document.createElement('select');
+            timeSelect.id = 'time';
+            timeSelect.innerHTML = `
+                <option value="">Select Time</option>
+                <option value="part-time">Part-Time</option>
+                <option value="full-time">Full-Time</option>
+            `;
+            filtersContainer.appendChild(timeSelect);
+            timeSelect.classList.add('filterSelect');
+
+            const workloadSelect = document.createElement('select');
+            workloadSelect.id = 'workload';
+            workloadSelect.innerHTML = `
+                <option value="">Select Workload</option>
+                <option value="light">Light</option>
+                <option value="medium">Medium</option>
+                <option value="heavy">Heavy</option>
+            `;
+            filtersContainer.appendChild(workloadSelect);
+            workloadSelect.classList.add('filterSelect');
+
+            const gradeLevelSelect = document.createElement('select');
+            gradeLevelSelect.id = 'gradeLevels';
+            gradeLevelSelect.innerHTML = `
+                <option value="">Select Grade Level</option>
+                <option value="fresh">Freshmen</option>
+                <option value="soph">Sophmore</option>
+                <option value="jun">Junior</option>
+                <option value="sen">Senior</option>
+            `;
+            filtersContainer.appendChild(gradeLevelSelect);
+            gradeLevelSelect.classList.add('filterSelect');
+            // Select all the filter select elements
+
+
+
+            /*
+                    // Style the select elements
+                    [typeSelect, gradeLevelSelect, experienceSelect, timeSelect, workloadSelect].forEach(select => {
+                        select.style.display = 'block';
+                        select.style.marginBottom = '10px';
+                        select.style.width = '100%';
+                    });*/
+
+            // Append the filters container to the parent container
+            parentContainer.appendChild(filtersContainer);
+
+            // Create a container for job entries
+            const entriesContainer = document.createElement('div');
+            entriesContainer.style.flex = '1'; // Take remaining space
+            entriesContainer.style.height = '100%';
+            entriesContainer.style.overflowY = 'auto';
+            entriesContainer.style.padding = '10px';
+            entriesContainer.style.boxSizing = 'border-box';
+            entriesContainer.id = 'ec';
+
+            parentContainer.appendChild(entriesContainer);
+
+            // Append the parent container to the display
+            this.posDisp.appendChild(parentContainer);
+
+            // Create the "Create Job" button
             const button = document.createElement("button");
             button.textContent = "Create Job";
             button.addEventListener("click", () => {
                 window.location.href = "createJob.html";
             });
+
             const vButton = document.createElement("button");
             vButton.textContent = "View Posts";
             vButton.addEventListener("click",() =>{
                 window.location.href = "viewPosts.html";
             });
 
-            //this.posDisp!.appendChild(button);
+
+            entriesContainer.appendChild(button);
+
+            // Load and display job entries
             onValue(positionsRef, (snapshot: DataSnapshot) => {
-                this.posDisp!.innerHTML = '';
-                this.posDisp!.appendChild(button);
-                this.posDisp!.appendChild(vButton);
+                entriesContainer.innerHTML = ''; 
+                entriesContainer.appendChild(button); 
+                entriesContainer.appendChild(vButton); 
                 snapshot.forEach((levelSnapshot: DataSnapshot) => {
                     const Refkey = levelSnapshot.key;
                     const positionData = levelSnapshot.val();
@@ -302,6 +569,7 @@ class Homepage {
                     const fullMajors = this.mapMajors(majors);
                     const positionDiv = document.createElement('div');
                     positionDiv.classList.add('entry');
+                    positionDiv.setAttribute('job-key', Refkey!);
                     positionDiv.style.marginBottom = '10px';
                     positionDiv.innerHTML = `
                         <strong>Title:</strong> ${title || "No Title"} <br>
@@ -311,43 +579,100 @@ class Homepage {
                     `;
                     positionDiv.addEventListener('click', () => {
                         window.location.href = "viewJob.html?id=" + Refkey;
-
                     });
-                    // the following is for pfp
-                    const squareDiv = document.createElement('div');
-                    const storage = getStorage();
-                    const profilePicRef = storageRef(storage, `jobLogos/${Refkey}`);
-                    if (profilePicRef) {
-
-                        getDownloadURL(profilePicRef)
-                            .then((downloadURL: string) => {
-
-                                squareDiv.classList.add('grey-square');
-
-                                // Ensure pepDisp exists before prepending
-                                if (positionDiv) {
-                                    positionDiv.prepend(squareDiv);
-
-                                    const profileImage = document.createElement('img');
-                                    profileImage.id = 'profileImage';
-                                    profileImage.src = downloadURL; // Set the profile image source to the download URL
-                                    profileImage.alt = 'Profile Picture';
-                                    profileImage.style.width = '100%'; // Adjust as necessary
-                                    profileImage.style.height = '100%'; // Adjust as necessary
-                                    profileImage.style.objectFit = 'cover'; // Ensure the image fits nicely
-
-                                    squareDiv.appendChild(profileImage);
-                                }
-                            })
-                            .catch((error: any) => {
-                                console.error("Error fetching profile picture:", error);
-                            });
+                     // the following is for pfp
+                     const squareDiv = document.createElement('div');
+                     const storage = getStorage();
+                     const profilePicRef = storageRef(storage, `jobLogos/${Refkey}`);
+                     if (profilePicRef) {
+ 
+                         getDownloadURL(profilePicRef)
+                             .then((downloadURL: string) => {
+ 
+                                 squareDiv.classList.add('grey-square');
+ 
+                                 // Ensure pepDisp exists before prepending
+                                 if (positionDiv) {
+                                     positionDiv.prepend(squareDiv);
+ 
+                                     const profileImage = document.createElement('img');
+                                     profileImage.id = 'profileImage';
+                                     profileImage.src = downloadURL; 
+                                     profileImage.alt = 'Profile Picture';
+                                     profileImage.style.width = '100%'; 
+                                     profileImage.style.height = '100%'; 
+                                     profileImage.style.objectFit = 'cover'; 
+ 
+                                     squareDiv.appendChild(profileImage);
+                                 }
+                             })
+                             .catch((error: any) => {
+                                 console.error("Error fetching profile picture:", error);
+                             });
                     }
-                    this.posDisp!.appendChild(positionDiv);
+                    entriesContainer.appendChild(positionDiv);
+                    const filterSelects = document.querySelectorAll('.filterSelect');
+       
+                    let currentFilters: { [key: string]: string } = {
+                        type: "",
+                        expirence: "",
+                        time: "",
+                        workload: "",
+                        gradeLevels: ""
+                    };
+                    filterSelects.forEach(select => {
+                        select.addEventListener('change', (event) => {
+                            const target = event.target as HTMLSelectElement | null;
+                    
+                            if (target) {
+                                const selectedValue = target.value;
+                                const selectId = target.id;
+                    
+                                // Update the current filter state
+                                currentFilters[selectId] = selectedValue.trim() === "" ? "" : selectedValue;
+                    
+                                // Update the entries based on all active filters
+                                this.updateEntries(currentFilters);
+                            }
+                        });
+                    });
                 });
             });
-
         }
+    }
+    updateEntries(currentFilters: { [key: string]: string })  {
+        const posRef = ref(database, 'jobs');
+        const ec = document.getElementById('ec');
+        const entries = this.posDisp!.querySelectorAll('.entry');
+    
+        onValue(posRef, (snapshot: DataSnapshot) => {
+            snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                const posData = levelSnapshot.val();
+                const refKey = levelSnapshot.key;
+    
+                // Check if the job entry matches all active filters
+                let shouldDisplay = true;
+                for (const [filterId, filterValue] of Object.entries(currentFilters)) {
+                    if (filterValue && posData[filterId] !== filterValue) {
+                        shouldDisplay = false;
+                        break;
+                    }
+                }
+    
+                const entry = Array.from(entries).find((entry) => entry.getAttribute('job-key') === refKey);
+                
+                if (entry) {
+                    const entryElement = entry as HTMLElement;
+    
+                    // Show the entry if it matches the filters, hide it otherwise
+                    if (shouldDisplay) {
+                        entryElement.style.display = 'block';
+                    } else {
+                        entryElement.style.display = 'none';
+                    }
+                }
+            });
+        });
     }
 
     mapMajors(majors: string[]): string[] {
