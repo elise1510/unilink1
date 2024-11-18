@@ -80,6 +80,13 @@ class UserRegistration {
 
             await updateProfile(user, { displayName: this.username });
             await this.saveUserRole(user.uid, role);
+             localStorage.setItem('userinfo', JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                credentials: userCredential,
+                user: userCredential.user
+            }));
+            console.log(localStorage.userinfo)
 
             this.updateMessage(`User registered successfully as a ${role}.`, 'green');
         } catch (error: any) {
@@ -126,7 +133,9 @@ form.addEventListener('submit', async (event) => {
     if (UserRegistration.validateForm(username, email, password)) {
         const userRegistration = new UserRegistration(username, email, password);
         await userRegistration.register();
+        
         window.location.href = 'profile.html';
+        
     }
 });
 

@@ -267,6 +267,18 @@ class Homepage {
                     window.location.href = "chat.html?id=" + uid;
                 }
             });
+            const seeProfileButton = document.createElement("button");
+            seeProfileButton.textContent = "See Profile";
+            seeProfileButton.addEventListener("click", () => {
+                window.location.href = "profile.html";
+            });
+
+            const logoutButton = document.createElement("button");
+            logoutButton.textContent = "Logout";
+            logoutButton.addEventListener("click", () => {
+                localStorage.clear();
+                window.location.href = "login.html";
+            });
 
             // Append search input and button to the display
             this.pepDisp.appendChild(searchInput);
@@ -284,6 +296,9 @@ class Homepage {
                 this.pepDisp!.appendChild(searchInput);
                 this.pepDisp!.appendChild(searchButton);
                 this.pepDisp!.appendChild(button);
+                this.pepDisp!.appendChild(seeProfileButton);
+                this.pepDisp!.appendChild(logoutButton);
+
 
                 snapshot.forEach((childSnapshot: DataSnapshot) => {
                     const refKey = childSnapshot.key;
@@ -493,6 +508,7 @@ class Homepage {
             button.addEventListener("click", () => {
                 window.location.href = "createJob.html";
             });
+
             entriesContainer.appendChild(button);
 
             // Load and display job entries
