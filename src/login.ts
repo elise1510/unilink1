@@ -29,7 +29,13 @@ class UserLogin {
         this.email = email;
         this.password = password;
     }
-
+    async setItemAndWait(key: string, value: string) {
+        return new Promise<void>((resolve) => {
+            localStorage.setItem(key, value);
+            resolve();
+        });
+    }
+    
     async login(): Promise<void> {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password);
@@ -38,15 +44,20 @@ class UserLogin {
             console.log(user)
             this.updateMessage(`Login successful. Welcome, ${user.email}!`, 'green');
             console.log('Login successful:', user);
-            localStorage.setItem('userinfo', JSON.stringify({
+            await this.setItemAndWait('userinfo', JSON.stringify({
                 uid: user.uid,
                 email: user.email,
                 credentials: userCredential,
+                password: this.password,
                 user: userCredential.user
             }));
+            const userString = localStorage.getItem('userinfo')
+            if(userString){
+                window.location.href = 'homepage.html';
+            }
 
 
-            window.location.href = 'profile.html';
+            
 
         } catch (error: any) {
             if (error.code === 'auth/user-not-found') {
@@ -81,11 +92,13 @@ class UserLogin {
     }
     static async autoLogin(): Promise<void> {
         const savedUser = localStorage.getItem('userinfo');
+        console.log(savedUser);
         if (savedUser) {
             const { email, password } = JSON.parse(savedUser);
+            console.log(email,password)
             if (email && password) {
                 const userLogin = new UserLogin(email, password);
-                await userLogin.login();
+               await userLogin.login();
             }
         }
     }

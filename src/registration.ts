@@ -44,7 +44,7 @@ class UserRegistration {
         return null;
     }
 
-    private updateMessage(message: string, color: string) {
+    private async updateMessage(message: string, color: string) {
         const messageDiv = document.getElementById('message') as HTMLElement;
         messageDiv.style.color = color;
         messageDiv.innerText = message;
@@ -88,7 +88,8 @@ class UserRegistration {
             }));
             console.log(localStorage.userinfo)
 
-            this.updateMessage(`User registered successfully as a ${role}.`, 'green');
+            await this.updateMessage(`User registered successfully as a ${role}.`, 'green');
+            window.location.href = 'profile.html';
         } catch (error: any) {
             if (error.code === 'auth/email-already-in-use') {
                 this.updateMessage('Email is already taken.', 'red');
@@ -134,7 +135,7 @@ form.addEventListener('submit', async (event) => {
         const userRegistration = new UserRegistration(username, email, password);
         await userRegistration.register();
         
-        window.location.href = 'profile.html';
+       
         
     }
 });

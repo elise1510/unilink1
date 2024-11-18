@@ -3,7 +3,9 @@ import { getAuth, updateProfile } from 'https://www.gstatic.com/firebasejs/10.13
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, get, set, child } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, get, set, update, child, DataSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+//@ts-ignore
+import { getStorage,  ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
-
+const storage = getStorage();
 //majors
 const majorsByCollege = {
     CAPPA: [
@@ -72,7 +74,7 @@ const majorsByCollege = {
         { value: 'music', text: 'Music' },
         { value: 'musicInd', text: 'Music Industry Studies' },
         { value: 'musicPerf', text: 'Music Performance' },
-        { value: 'philant', text: 'Philanthropy' },
+        { value: 'phiant', text: 'Philanthropy' },
         { value: 'phil', text: 'Philosophy' },
         { value: 'polSci', text: 'Political Science' },
         { value: 'soc', text: 'Sociology' },
@@ -194,17 +196,17 @@ class UserProfile {
             }
         }
     }
-     toggleEditProfile(editMode: boolean) {
+    toggleEditProfile(editMode: boolean) {
         const inputs = document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
             '#user-profile input, #user-profile select, #user-profile textarea'
         );
-        
+
         inputs.forEach(input => {
-            if (input.id === 'email'||input.id === 'role') {
+            if (input.id === 'email' || input.id === 'role') {
                 input.disabled = true;
             } else if (input.id === 'name') {
                 if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
-                    input.readOnly = !editMode; 
+                    input.readOnly = !editMode;
                 }
             } else {
                 if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
@@ -214,10 +216,10 @@ class UserProfile {
                 }
             }
         });
-    
+
         const editButton = document.getElementById('edit-profile-btn') as HTMLButtonElement;
         const saveButton = document.getElementById('save-profile-btn') as HTMLButtonElement;
-    
+
         if (editMode) {
             editButton.style.display = 'none';
             saveButton.style.display = 'inline-block';
@@ -245,7 +247,7 @@ form.addEventListener('submit', async (event) => {
         await profile.saveProfile(uid);
         await profile.updateAuthProfile(uid);
         const up = new UserProfile();
-        up.toggleEditProfile(false);  
+        up.toggleEditProfile(false);
     }
 });
 function updateMajors() {
@@ -274,7 +276,7 @@ async function loadUserData(uid: string) {
     if (uid) {
         const userRef = ref(database, 'users/' + uid);
         const snapshot = await get(userRef);
-    
+
         if (snapshot.exists()) {
             const userData = snapshot.val();
             (document.getElementById('name') as HTMLInputElement).value = userData?.name || '';
@@ -299,19 +301,206 @@ window.onload = async () => {
         await UserProfile.loadProfile(uid)
         console.log("fdasfda");
         const up = new UserProfile();
-        up.toggleEditProfile(false); 
+        up.toggleEditProfile(false);
+        loadProfilePicture();
     }
 };
 
 const tele = document.getElementById('phone') as HTMLInputElement;
-if (tele){
-tele.addEventListener('keyup', function(e: KeyboardEvent) {
-    if (e.key !== 'Backspace' && (tele.value.length === 3 || tele.value.length === 7)) {
-        tele.value += '-';
-    }
-});
+if (tele) {
+    tele.addEventListener('keyup', function (e: KeyboardEvent) {
+        if (e.key !== 'Backspace' && (tele.value.length === 3 || tele.value.length === 7)) {
+            tele.value += '-';
+        }
+    });
 }
 const homeButton = document.getElementById("home") as HTMLInputElement;
 homeButton.addEventListener('click', () => {
     window.location.href = "homepage.html";
+});
+
+document.getElementById("uploadProfileBtn")?.addEventListener("click", async () => {
+    const userString = localStorage.getItem('userinfo');
+    if (userString) {
+        const user = JSON.parse(userString);
+        const uid = user.uid;
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const storage = getStorage(); // Ensure storage is initialized
+                const storageRefPath = storageRef(storage, 'profile-pictures/' + uid);
+
+                const uploadTask = uploadBytesResumable(storageRefPath, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot: UploadTaskSnapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log(`Upload is ${progress}% done`);
+                    },
+                    (error: any) => {
+                        console.error("Upload failed:", error);
+                    },
+                    async () => {
+                        try {
+                            const downloadURL: string = await getDownloadURL(uploadTask.snapshot.ref);
+                            console.log("File available at:", downloadURL);
+
+                            const db = getDatabase();
+                            const profileUpdates = {
+                                ['profile-pictures/' + uid]: downloadURL
+                            };
+
+                            await update(ref(db), profileUpdates);
+                            console.log("Profile picture URL updated in Realtime Database.");
+
+                            // Load the profile picture after updating the URL
+                            loadProfilePicture();
+                        } catch (error) {
+                            console.error("Error getting download URL or updating database:", error);
+                        }
+                    }
+                );
+            }
+        };
+    } else {
+        console.error("User not found in localStorage");
+    }
+});
+
+async function loadProfilePicture() {
+    const userString = localStorage.getItem('userinfo');
+    if (userString) {
+        const user = JSON.parse(userString);
+        const uid: string = user.uid;
+
+        const storage = getStorage();
+        const db = getDatabase();
+
+        const profilePicRef = storageRef(storage, `profile-pictures/${uid}`);
+
+        try {
+            const downloadURL: string = await getDownloadURL(profilePicRef);
+            const profileImage: HTMLImageElement | null = document.getElementById('profileImage') as HTMLImageElement;
+            console.log(profileImage);
+            if (profileImage) {
+                profileImage.src = downloadURL;
+            }
+        } catch (error: any) {
+            console.error("Error fetching profile picture:", error);
+        }
+    }
+}
+document.getElementById("uploadResBtn")?.addEventListener("click", async () => {
+    const userString = localStorage.getItem('userinfo');
+    if (userString) {
+        const user = JSON.parse(userString);
+        const uid = user.uid;
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.pdf'
+        fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const storage = getStorage();
+                const storageRefPath = storageRef(storage, 'resume/' + uid);
+                console.log("Starting file upload...");
+                const uploadTask = uploadBytesResumable(storageRefPath, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot: UploadTaskSnapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                       // console.log('Upload is ' + progress + '% done');
+                    },
+                    (error: any) => {
+                        console.error("Upload failed:", error);
+                    },
+                    async () => {
+                        try {
+                            const downloadURL: string = await getDownloadURL(uploadTask.snapshot.ref);
+                            console.log("File uploaded successfully. Download URL:", downloadURL);
+
+                            const db = getDatabase();
+                            const profileUpdates = {
+                                ['resume/' + uid]: downloadURL 
+                            };
+
+                            await update(ref(db), profileUpdates);
+                            console.log("Resume URL updated successfully in Realtime Database.");
+
+                           
+                        } catch (error) {
+                            console.error("Error handling file upload or updating database:", error);
+                        }
+                    }
+                );
+            } else {
+                console.error("No file selected.");
+            }
+        };
+    } else {
+        console.error("User not found in localStorage");
+    }
+});
+document.getElementById("uploadCVBtn")?.addEventListener("click", async () => {
+    const userString = localStorage.getItem('userinfo');
+    if (userString) {
+        const user = JSON.parse(userString);
+        const uid = user.uid;
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.doc,.docx,.pdf'
+        fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const storage = getStorage();
+                const storageRefPath = storageRef(storage, 'coverLetter/' + uid);
+                console.log("Starting file upload...");
+                const uploadTask = uploadBytesResumable(storageRefPath, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot: UploadTaskSnapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                       // console.log('Upload is ' + progress + '% done');
+                    },
+                    (error: any) => {
+                        console.error("Upload failed:", error);
+                    },
+                    async () => {
+                        try {
+                            const downloadURL: string = await getDownloadURL(uploadTask.snapshot.ref);
+                            console.log("File uploaded successfully. Download URL:", downloadURL);
+
+                            const db = getDatabase();
+                            const profileUpdates = {
+                                ['coverLetter/' + uid]: downloadURL 
+                            };
+
+                            await update(ref(db), profileUpdates);
+                            console.log("Resume URL updated successfully in Realtime Database.");
+
+                           
+                        } catch (error) {
+                            console.error("Error handling file upload or updating database:", error);
+                        }
+                    }
+                );
+            } else {
+                console.error("No file selected.");
+            }
+        };
+    } else {
+        console.error("User not found in localStorage");
+    }
 });

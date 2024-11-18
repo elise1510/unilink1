@@ -3,7 +3,9 @@ import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'https://
 // @ts-ignore
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 // @ts-ignore
-import { getDatabase, ref, onValue, DataSnapshot, get, child } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+import { getDatabase, ref, onValue, DataSnapshot, get, set, child } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js';
+//@ts-ignore
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, UploadTaskSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -107,7 +109,7 @@ const majorsByCollege = {
 
 
 class JobViewer {
-    private jobId: string | null;
+    public jobId: string | null;
 
     constructor() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -128,6 +130,7 @@ class JobViewer {
 
     private displayJobData(jobData: any) {
         /*About*/
+        this.displayJobLogo();
         this.setElementTextContent("about", jobData?.about, "not set");
         /*Title*/
         this.setElementTextContent("title", jobData?.title, "not set");
@@ -140,25 +143,25 @@ class JobViewer {
             jdMajors = this.mapMajors(jdMajors);
             this.setElementTextContent("majors", jdMajors.join(', '), "Not set");
         }
-        else{
-            this.setElementTextContent("majors", jdMajors, "Not set"); 
+        else {
+            this.setElementTextContent("majors", jdMajors, "Not set");
         }
         if (jdColleges !== "Not set") {
             jdColleges = this.mapColleges(jdColleges);
             this.setElementTextContent("college", jdColleges.join(', '), "Not set");
         }
-        else{
+        else {
             this.setElementTextContent("college", jdColleges.join(', '), "Not set");
         }
 
-       //const formMajors = document.getElementById("majors");
-       // formMajors?.replaceChildren();
+        //const formMajors = document.getElementById("majors");
+        // formMajors?.replaceChildren();
         //formMajors!.textContent = jdMajors.join(', ');
 
-       //const formColleges = document.getElementById("college");
+        //const formColleges = document.getElementById("college");
         //formColleges?.replaceChildren();
-       // formColleges!.textContent = jdColleges.join(', ');
-       
+        // formColleges!.textContent = jdColleges.join(', ');
+
         //#endregion
 
         //Key Responsibilities
@@ -177,7 +180,7 @@ class JobViewer {
             jdGLs = this.mapGradeLevels(jdGLs);
             this.setElementTextContent("grade-level", jdGLs.join(', '), "Not set");
         }
-        else{
+        else {
             this.setElementTextContent("grade-level", jdGLs, "Not set");
         }
         //rate
@@ -238,19 +241,112 @@ class JobViewer {
     private setHourlyRate(minRate: number | null, maxRate: number | null) {
         const hourlyRateMin = document.getElementById("hourly-rate-min");
         const hourlyRateMax = document.getElementById("hourly-rate-max");
-    
-        const rateText = minRate !== null && maxRate !== null 
-            ? `$${minRate.toFixed(2)} - $${maxRate.toFixed(2)}` 
+
+        const rateText = minRate !== null && maxRate !== null
+            ? `$${minRate.toFixed(2)} - $${maxRate.toFixed(2)}`
             : "Not Set";
-    
+
         hourlyRateMin!.textContent = rateText;
         hourlyRateMax!.textContent = "";
+    }
+    private async displayJobLogo() {
+        const jobRef = ref(database, 'jobs/' + this.jobId);
+
+        try {
+            const snapshot: DataSnapshot = await get(jobRef);
+
+            if (snapshot.exists()) {
+                const jobData = snapshot.val();
+                const logoUrl = jobData.logo;
+
+                const logoImage = document.getElementById('logo-image') as HTMLImageElement;
+                if (logoUrl) {
+                    logoImage.src = logoUrl;
+                } else {
+                    console.log('No logo URL found for this job.');
+                }
+            } else {
+                console.log('No job data found for the provided job ID.');
+            }
+        } catch (error) {
+            console.error('Error fetching job logo:', error);
+        }
     }
 }
 
 window.onload = () => {
     const viewer = new JobViewer();
     viewer.getData();
+
+
+
+    const ResButton = document.getElementById("res") as HTMLInputElement;
+
+    ResButton?.addEventListener("click", async () => {
+        const userString = localStorage.getItem('userinfo');
+
+        if (userString) {
+            const user = JSON.parse(userString);
+            const uid = user.uid;
+            const jobId = viewer.jobId;
+
+            if (jobId) {
+                const db = getDatabase();
+                const jobRef = ref(db, `jobs/${jobId}`);
+                const applicantsRef = ref(db, `jobs/${jobId}/applicants`);
+
+
+                let messageElement = document.getElementById("message");
+                if (!messageElement) {
+                    messageElement = document.createElement("div");
+                    messageElement.id = "message";
+                    document.body.appendChild(messageElement);
+                }
+
+                try {
+
+                    const jobSnapshot = await get(jobRef);
+                    if (jobSnapshot.exists()) {
+                        const jobData = jobSnapshot.val();
+                        const maxApplicants = jobData.maxApplicants;
+                        const applicants = jobData.applicants ? jobData.applicants : {};
+                        const currentApplicants = Object.keys(applicants).length;
+                    
+                        if (applicants[uid]) {
+                            messageElement.textContent = "You have already applied for this job.";
+                        } else if (currentApplicants < maxApplicants) {
+                           
+                            applicants[uid] = {
+                                uid: uid,
+                                accepted: false,
+                                rejected: false
+                            };
+                    
+                            
+                            await set(jobRef, {
+                                ...jobData,
+                                applicants: applicants
+                            });
+                    
+                            messageElement.textContent = "You have successfully applied for the job.";
+                        } else {
+                            messageElement.textContent = "This job is full.";
+                        }
+                    } else {
+                        messageElement.textContent = "Job not found.";
+                    }
+                } catch (error) {
+                    console.error("Error fetching job details:", error);
+                    messageElement.textContent = "Error applying for the job.";
+                }
+            } else {
+                console.error("Job ID not available.");
+            }
+        } else {
+            console.error("User not found in localStorage");
+        }
+    });
+
 };
 
 const homeButton = document.getElementById("home") as HTMLInputElement;
@@ -258,4 +354,3 @@ homeButton.addEventListener('click', () => {
     window.location.href = "homepage.html";
 });
 
-const ResButton = document.getElementById("res") as HTMLInputElement;
