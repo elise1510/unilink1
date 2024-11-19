@@ -198,6 +198,7 @@ class Homepage {
                     this.eveDisp.style.display = 'block';
                     this.posDisp.classList.remove('active');
                     this.posDisp.style.display = 'none';
+                    this.displayEventsData();
                 } else if (inputRadio.value === 'pos' && this.pepDisp && this.eveDisp && this.posDisp) {
                     this.pepDisp.classList.remove('active');
                     this.pepDisp.style.display = 'none';
@@ -673,6 +674,73 @@ class Homepage {
                 }
             });
         });
+    }
+    displayEventsData() {
+        const eveRef = ref(database, 'events');
+        if (this.eveDisp) {
+            const button = document.createElement("button");
+            button.textContent = "Create Event";
+            button.addEventListener("click", () => {
+                window.location.href = "createEvent.html";
+            });
+            this.eveDisp!.appendChild(button);
+            
+            onValue(eveRef, (snapshot: DataSnapshot) => {
+                this.eveDisp!.innerHTML = '';
+                this.eveDisp!.appendChild(button);
+                snapshot.forEach((levelSnapshot: DataSnapshot) => {
+                    const Refkey = levelSnapshot.key;
+                    const positionData = levelSnapshot.val();
+                    const { title, location, date, organizer } = positionData;
+                    const eventDiv = document.createElement('div');
+                    eventDiv.classList.add('entry');
+                    eventDiv.style.marginBottom = '10px';
+                    eventDiv.innerHTML = `
+                        <strong>Title:</strong> ${title || "No Title"} <br>
+                        <strong>Location:</strong> ${location} <br>
+                        <strong>Date:</strong> $${date} <br>
+                        <strong>Organizer:</strong> ${organizer}
+                    `;
+                    eventDiv.addEventListener('click', () => {
+                        //TODO:ZOBIA
+                        window.location.href = "viewEvents.html?id=" + Refkey;
+
+                    });
+                    // the following is for pfp
+                    const squareDiv = document.createElement('div');
+                    const storage = getStorage();
+                    const profilePicRef = storageRef(storage, `eventBanners/${Refkey}`);
+                    if (profilePicRef) {
+
+                        getDownloadURL(profilePicRef)
+                            .then((downloadURL: string) => {
+
+                                squareDiv.classList.add('grey-square');
+
+                                // Ensure pepDisp exists before prepending
+                                if (eventDiv) {
+                                    eventDiv.prepend(squareDiv);
+
+                                    const profileImage = document.createElement('img');
+                                    profileImage.id = 'profileImage';
+                                    profileImage.src = downloadURL; // Set the profile image source to the download URL
+                                    profileImage.alt = 'Profile Picture';
+                                    profileImage.style.width = '100%'; // Adjust as necessary
+                                    profileImage.style.height = '100%'; // Adjust as necessary
+                                    profileImage.style.objectFit = 'cover'; // Ensure the image fits nicely
+
+                                    squareDiv.appendChild(profileImage);
+                                }
+                            })
+                            .catch((error: any) => {
+                                console.error("Error fetching profile picture:", error);
+                            });
+                    }
+                    this.eveDisp!.appendChild(eventDiv);
+                });
+            });
+
+        }
     }
 
     mapMajors(majors: string[]): string[] {
