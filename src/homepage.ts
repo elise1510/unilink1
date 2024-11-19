@@ -448,13 +448,14 @@ class Homepage {
 
             // Filter containtainer styling that's functional in nature, pins it to the top left and doesn't let it scroll + shortens it a bit
             const filtersContainer = document.createElement('div');
+            filtersContainer.id = 'filtersContainer';
             filtersContainer.style.width = '150px';
             filtersContainer.style.position = 'sticky';
             filtersContainer.style.top = '0';
             filtersContainer.style.height = '100%';
             filtersContainer.style.padding = '10px';
             filtersContainer.style.boxSizing = 'border-box';
-            filtersContainer.style.backgroundColor = '#f4f4f4';
+            filtersContainer.style.backgroundColor = '#f7e9cf';
             filtersContainer.style.borderRight = '1px solid #ccc';
             filtersContainer.style.overflowY = 'auto';
 

@@ -12,6 +12,9 @@
     .pos-disp {
       display: none;
     }
+    body{
+  background-color: #FFF0D4;
+}
 
     .filterSelect {
       display: block;
@@ -28,6 +31,27 @@
       box-shadow: 0 2px 0 0 black;
       /* add a 2px gap with a box-shadow */
     }
+    button {
+    background-color: #d98e30;
+    color: #fff;
+    margin: 10px 10px;
+    font-family: 'futura', Courier, monospace;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #c97a26;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    background-color: #b56b21;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
 
     .container {
       display: inline;
@@ -106,14 +130,16 @@
     }
 
     .entry {
-      background-color: #f0f0f0;
+      background-color: #FEF8ED;
       padding: 10px;
       border-radius: 5px;
+      font-family: 'futura';
+      font-size: medium;
     }
 
     .grey-square {
-      width: 25px;
-      height: 25px;
+      width: 35px;
+      height: 35px;
       background-color: #d0d0d0;
       display: inline-block;
       margin-right: 8px;
@@ -128,6 +154,14 @@
       /* add some padding between the lines */
       box-shadow: 0 2px 0 0 black;
       /* add a 2px gap with a box-shadow */
+    }
+    select{
+      font-family: 'futura';
+    }
+    #filtersContainer{
+      font-family: 'futura';
+      color: #f7e9cf;
+
     }
 
     /* Style the label when it's active */
